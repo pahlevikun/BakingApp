@@ -6,10 +6,12 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -30,15 +32,18 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.udacity.bakingapp.pojo.Step;
 
+import java.util.ArrayList;
+
 public class StepActivity extends AppCompatActivity {
 
-    private Step step;
-    private ImageView imageView;
+    private ArrayList<Step> stepList = new ArrayList<>();
+    private ImageView imageView, imagePrev, imageNext;
     private TextView textView;
     private SimpleExoPlayerView simpleExoPlayerView;
     private SimpleExoPlayer player;
     private BandwidthMeter bandwidthMeter;
     private Handler handler;
+    private int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,55 +57,119 @@ public class StepActivity extends AppCompatActivity {
         simpleExoPlayerView = (SimpleExoPlayerView) findViewById(R.id.playerView);
         imageView = (ImageView) findViewById(R.id.imageView);
         textView = (TextView) findViewById(R.id.textViewStep);
+        imagePrev = (ImageView) findViewById(R.id.imageViewPrevious);
+        imageNext = (ImageView) findViewById(R.id.imageViewNext);
         handler = new Handler();
         bandwidthMeter = new DefaultBandwidthMeter();
 
         Intent intent = getIntent();
         if (intent != null) {
-            setTitle(intent.getStringExtra("title"));
+            id = intent.getIntExtra("id", 0);
+            setTitle("Step-" + id);
             if (intent.hasExtra("parcel")) {
-                step = intent.getParcelableExtra("parcel");
+                stepList = intent.getParcelableArrayListExtra("parcel");
             } else {
                 finish();
             }
         }
 
-        textView.setText(step.description);
-        if (step.videoURL.isEmpty()||step.videoURL.length()<3){
+        textView.setText(stepList.get(id).getDescription());
+        if (stepList.get(id).getVideoURL().isEmpty()) {
             imageView.setVisibility(View.VISIBLE);
             simpleExoPlayerView.setVisibility(View.GONE);
-        }else{
+        } else {
             imageView.setVisibility(View.GONE);
             simpleExoPlayerView.setVisibility(View.VISIBLE);
-            String userAgent = Util.getUserAgent(StepActivity.this, "ExoPlayerBakingApp");
-            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
-            DefaultTrackSelector trackSelector = new DefaultTrackSelector(handler, videoTrackSelectionFactory);
-            LoadControl loadControl = new DefaultLoadControl();
+            initializePlayer();
+        }
 
-            player = ExoPlayerFactory.newSimpleInstance(StepActivity.this, trackSelector, loadControl);
-            simpleExoPlayerView.setPlayer(player);
+        imageNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (id >= (stepList.size() - 1)) {
+                    Toast.makeText(StepActivity.this, "Final Step!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Intent intent = new Intent(StepActivity.this, StepActivity.class);
+                    intent.putExtra("id", (id + 1));
+                    intent.putParcelableArrayListExtra("parcel", stepList);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        });
 
-            MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(step.videoURL), new DefaultDataSourceFactory(StepActivity.this, userAgent), new DefaultExtractorsFactory(), null, null);
-            player.prepare(mediaSource);
-            player.setPlayWhenReady(true);
+        imagePrev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if ((stepList.size() - 1) < 0) {
+                    Toast.makeText(StepActivity.this, "First Step!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Intent intent = new Intent(StepActivity.this, StepActivity.class);
+                    intent.putExtra("id", (id - 1));
+                    intent.putParcelableArrayListExtra("parcel", stepList);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (Util.SDK_INT > 23) {
+            initializePlayer();
         }
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        if (player!=null) {
-            player.stop();
-            player.release();
+    public void onResume() {
+        super.onResume();
+        if ((Util.SDK_INT <= 23 || player == null)) {
+            initializePlayer();
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (player!=null) {
-            player.stop();
+        if (Util.SDK_INT <= 23) {
+            releasePlayer();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (Util.SDK_INT > 23) {
+            releasePlayer();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
+    }
+
+    private void initializePlayer() {
+        String userAgent = Util.getUserAgent(StepActivity.this, "ExoPlayerBakingApp");
+        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
+        DefaultTrackSelector trackSelector = new DefaultTrackSelector(handler, videoTrackSelectionFactory);
+        LoadControl loadControl = new DefaultLoadControl();
+
+        player = ExoPlayerFactory.newSimpleInstance(StepActivity.this, trackSelector, loadControl);
+        simpleExoPlayerView.setPlayer(player);
+
+        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(stepList.get(id).getVideoURL()), new DefaultDataSourceFactory(StepActivity.this, userAgent), new DefaultExtractorsFactory(), null, null);
+        player.prepare(mediaSource);
+        player.setPlayWhenReady(true);
+    }
+
+    private void releasePlayer() {
+        if (player != null) {
             player.release();
+            player = null;
         }
     }
 

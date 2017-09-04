@@ -36,4 +36,5 @@ dependencies {
     compile 'com.android.support.test.espresso:espresso-contrib:2.2.2'
     compile 'com.android.support.test.espresso:espresso-core:2.2.2'
     testCompile 'junit:junit:4.12'
+    compile 'com.google.code.gson:gson:2.2.4'
 }

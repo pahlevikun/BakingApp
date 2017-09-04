@@ -8,7 +8,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.udacity.bakingapp.adapter.RecyclerAdapter;
 import com.udacity.bakingapp.adapter.RecyclerDetailAdapter;
 import com.udacity.bakingapp.pojo.Ingredient;
@@ -28,35 +31,63 @@ public class RecipeDetailActivity extends AppCompatActivity {
     private Recipe recipe;
     private RecyclerDetailAdapter adapter;
 
-    private List<Ingredient> ingredientList = new ArrayList<Ingredient>();
-    private List<Recipe> recipeList = new ArrayList<Recipe>();
-    private List<Step> stepList = new ArrayList<Step>();
+    private ImageView imageView;
+    private TextView textView;
+
+    private int id;
+
+    private StringBuffer temp = new StringBuffer();
+
+    private ArrayList<Ingredient> ingredientList = new ArrayList<Ingredient>();
+    private ArrayList<Recipe> recipeList = new ArrayList<Recipe>();
+    private ArrayList<Step> stepList = new ArrayList<Step>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recipe);
+        setContentView(R.layout.activity_recipe_details);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        imageView = (ImageView) findViewById(R.id.imageViewIngredients);
+        textView = (TextView) findViewById(R.id.textViewIngredients);
         Intent intent = getIntent();
         if (intent != null) {
             setTitle(intent.getStringExtra("title"));
             if (intent.hasExtra("parcel")) {
-                recipe = intent.getParcelableExtra("parcel");
+                //recipe = intent.getParcelableExtra("parcel");
+                recipeList = intent.getParcelableArrayListExtra("parcel");
+                id = intent.getIntExtra("id",0);
             } else {
                 finish();
             }
         }
-        stepList = recipe.steps;
+        stepList = recipeList.get(id).getSteps();
+        ingredientList = recipeList.get(id).getIngredients();
+        for (int i = 0; i< ingredientList.size(); i++){
+            temp.append((i+1)+". "+ingredientList.get(i).getIngredient()
+                    +"\n\t\t"+ingredientList.get(i).getQuantity()+" "+ingredientList.get(i).getMeasure()+"\n\n");
+        }
+        textView.setText(removeLastChar(temp+""));
+        if (recipeList.get(id).getImage().isEmpty()){
+            imageView.setImageResource(R.drawable.ic_novideo);
+        }else{
+            Picasso.with(this)
+                    .load(recipeList.get(id).getImage())
+                    .into(imageView);
+        }
         adapter = new RecyclerDetailAdapter(RecipeDetailActivity.this,stepList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
+    }
+
+    private static String removeLastChar(String str) {
+        return str.substring(0, str.length() - 2);
     }
 
     @Override

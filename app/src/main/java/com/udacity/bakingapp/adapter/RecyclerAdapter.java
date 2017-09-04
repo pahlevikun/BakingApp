@@ -15,6 +15,7 @@ import com.udacity.bakingapp.R;
 import com.udacity.bakingapp.RecipeDetailActivity;
 import com.udacity.bakingapp.pojo.Recipe;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,11 +23,11 @@ import java.util.List;
  */
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
-    private List<Recipe> movieData;
+    private ArrayList<Recipe> movieData;
     private Context context;
     private Recipe recipe;
 
-    public RecyclerAdapter(Context context, List<Recipe> movieData) {
+    public RecyclerAdapter(Context context, ArrayList<Recipe> movieData) {
         this.movieData = movieData;
         this.context = context;
     }
@@ -44,15 +45,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         viewHolder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                recipe = new Recipe(movieData.get(i).getId(),
+                /*recipe = new Recipe(movieData.get(i).getId(),
                                     movieData.get(i).getName(),
                                     movieData.get(i).getIngredients(),
                                     movieData.get(i).getSteps(),
                                     movieData.get(i).getServings(),
-                                    movieData.get(i).getImage());
+                                    movieData.get(i).getImage());*/
                 Intent intent = new Intent(context, RecipeDetailActivity.class);
                 intent.putExtra("title",movieData.get(i).getName());
-                intent.putExtra("parcel",recipe);
+                intent.putParcelableArrayListExtra("parcel",movieData);
+                intent.putExtra("id",i);
+                //intent.putExtra("parcel",recipe);
                 context.startActivity(intent);
             }
         });

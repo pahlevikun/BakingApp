@@ -1,13 +1,16 @@
 package com.udacity.bakingapp;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -39,12 +42,13 @@ public class MainActivity extends AppCompatActivity {
     private boolean doubleBackToExitPressedOnce = false;
     private ProgressDialog loading;
 
-    private List<Recipe> recipeList = new ArrayList<Recipe>();
-    private List<Step> stepList = new ArrayList<Step>();
-    private List<Ingredient> ingredientList = new ArrayList<Ingredient>();
+    private ArrayList<Recipe> recipeList = new ArrayList<Recipe>();
+    private ArrayList<Step> stepList = new ArrayList<Step>();
+    private ArrayList<Ingredient> ingredientList = new ArrayList<Ingredient>();
 
     private RecyclerView recyclerView;
     private RecyclerAdapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +60,14 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         adapter = new RecyclerAdapter(MainActivity.this,recipeList);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(mLayoutManager);
+        //layoutManager = new LinearLayoutManager(getApplicationContext());
+        if (getResources().getBoolean(R.bool.isTablet)){
+            layoutManager = new GridLayoutManager(MainActivity.this,calculateNoOfColumns(MainActivity.this));
+        }else{
+            layoutManager = new GridLayoutManager(MainActivity.this,1);
+
+        }
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
         getRecipe();
@@ -135,6 +145,14 @@ public class MainActivity extends AppCompatActivity {
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         postRequest.setRetryPolicy(policy);
         queue.add(postRequest);
+    }
+
+    public static int calculateNoOfColumns(Context context) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        int scalingFactor = 180;
+        int noOfColumns = (int) (dpWidth / scalingFactor);
+        return noOfColumns;
     }
 
     private void hideDialog() {

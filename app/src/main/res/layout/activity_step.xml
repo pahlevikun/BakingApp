@@ -61,6 +61,31 @@
                 android:padding="@dimen/_10sdp"
                 android:textColor="@color/colorText2"
                 android:textSize="@dimen/_12sdp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center">
+                <ImageView
+                    android:id="@+id/imageViewPrevious"
+                    android:layout_width="@dimen/_40sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_marginRight="@dimen/_25sdp"
+                    android:src="@drawable/ic_previous"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAllCaps="true"
+                    android:textColor="@color/colorText2"
+                    android:textSize="@dimen/_11sdp"
+                    android:textStyle="bold"
+                    android:text="Navigate"/>
+                <ImageView
+                    android:id="@+id/imageViewNext"
+                    android:layout_width="@dimen/_40sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_marginLeft="@dimen/_25sdp"
+                    android:src="@drawable/ic_next"/>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 
