@@ -9,10 +9,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:numColumns="1"
-        android:columnWidth="25dp"
-        android:layout_margin="2dp"
-        android:horizontalSpacing="5dp"
-        android:verticalSpacing="5dp"
+        android:columnWidth="@dimen/_25sdp"
+        android:layout_margin="@dimen/_2sdp"
+        android:horizontalSpacing="@dimen/_5sdp"
+        android:verticalSpacing="@dimen/_5sdp"
          />
 
 

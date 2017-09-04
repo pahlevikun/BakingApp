@@ -1,9 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     android:background="@drawable/ic_chrome_reader_mode_black_48dp"
-
     android:textAlignment="viewStart">
 
     <TextView
@@ -19,8 +17,8 @@
         android:contentDescription="@string/appwidget_text"
         android:fillViewport="false"
         android:text="@string/appwidget_text"
-        android:textColor="#ffffff"
-        android:textSize="14sp"
+        android:textColor="@color/colorText"
+        android:textSize="@dimen/_14sdp"
         android:textStyle="bold|italic" />
 
 </RelativeLayout>

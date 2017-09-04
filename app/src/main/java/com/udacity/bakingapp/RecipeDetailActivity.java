@@ -17,6 +17,7 @@ import com.udacity.bakingapp.adapter.RecyclerDetailAdapter;
 import com.udacity.bakingapp.pojo.Ingredient;
 import com.udacity.bakingapp.pojo.Recipe;
 import com.udacity.bakingapp.pojo.Step;
+import com.udacity.bakingapp.widget.UpdateBakingService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,9 +68,14 @@ public class RecipeDetailActivity extends AppCompatActivity {
         }
         stepList = recipeList.get(id).getSteps();
         ingredientList = recipeList.get(id).getIngredients();
+
+        ArrayList<String> recipeIngredientsForWidgets= new ArrayList<>();
+
         for (int i = 0; i< ingredientList.size(); i++){
             temp.append((i+1)+". "+ingredientList.get(i).getIngredient()
                     +"\n\t\t"+ingredientList.get(i).getQuantity()+" "+ingredientList.get(i).getMeasure()+"\n\n");
+            recipeIngredientsForWidgets.add((i+1)+". "+ingredientList.get(i).getIngredient()
+                    +"\n\t\t"+ingredientList.get(i).getQuantity()+" "+ingredientList.get(i).getMeasure());
         }
         textView.setText(removeLastChar(temp+""));
         if (recipeList.get(id).getImage().isEmpty()){
@@ -84,6 +90,11 @@ public class RecipeDetailActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
+
+
+
+        //update widget
+        UpdateBakingService.startBakingService(RecipeDetailActivity.this,recipeIngredientsForWidgets);
     }
 
     private static String removeLastChar(String str) {
