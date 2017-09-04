@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Baking App</string>
+    <string name="app_name">Baking App Udacity</string>
     <string name="appwidget_text">RECIPE INGREDIENTS WILL APPEAR HERE AFTER LAUNCHING &quot;BAKING APP&quot;</string>
     <bool name="isTablet">false</bool>
 </resources>

@@ -9,14 +9,12 @@ import android.content.Intent;
 import android.widget.RemoteViews;
 
 import com.udacity.bakingapp.R;
+import com.udacity.bakingapp.RecipeDetailActivity;
 
 import java.util.ArrayList;
 import static com.udacity.bakingapp.widget.UpdateBakingService.FROM_ACTIVITY_INGREDIENTS_LIST;
 
 public class BakingWidgetProvider extends AppWidgetProvider {
-
-    public static String REMOTEVIEW_INGREDIENT_LIST="REMOTEVIEW_INGREDIENT_LIST";
-    public static String REMOTEVIEW_BUNDLE="REMOTEVIEW_BUNDLE";
 
     static ArrayList<String> ingredientsList = new ArrayList<>();
 
@@ -26,12 +24,12 @@ public class BakingWidgetProvider extends AppWidgetProvider {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_grid_view);
 
         //call activity when widget is clicked, but resume activity from stack so you do not pass intent.extras afresh
-        /*Intent appIntent = new Intent(context, RecipeDetailActivity.class);
+        Intent appIntent = new Intent(context, RecipeDetailActivity.class);
         appIntent.addCategory(Intent.ACTION_MAIN);
         appIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         appIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT| Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent appPendingIntent = PendingIntent.getActivity(context, 0, appIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setPendingIntentTemplate(R.id.widget_grid_view, appPendingIntent);*/
+        views.setPendingIntentTemplate(R.id.widget_grid_view, appPendingIntent);
 
         // Set the GridWidgetService intent to act as the adapter for the GridView
         Intent intent = new Intent(context, GridWidgetService.class);

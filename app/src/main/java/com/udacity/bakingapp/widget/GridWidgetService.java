@@ -15,10 +15,10 @@ import static com.udacity.bakingapp.widget.BakingWidgetProvider.ingredientsList;
 public class GridWidgetService extends RemoteViewsService {
     List<String> remoteViewingredientsList;
 
-        @Override
-        public RemoteViewsFactory onGetViewFactory(Intent intent) {
-            return new GridRemoteViewsFactory(this.getApplicationContext(),intent);
-        }
+    @Override
+    public RemoteViewsFactory onGetViewFactory(Intent intent) {
+        return new GridRemoteViewsFactory(this.getApplicationContext(), intent);
+    }
 
 
     class GridRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
@@ -85,10 +85,8 @@ public class GridWidgetService extends RemoteViewsService {
         }
 
 
-
-
-        }
-
-
     }
+
+
+}
 
