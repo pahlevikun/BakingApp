@@ -13,9 +13,6 @@ import com.udacity.bakingapp.pojo.Step;
 
 import java.util.ArrayList;
 
-/**
- * Created by Andy on 04-Jan-15.
- */
 public class VersionsFragment extends ListFragment {
 
     private ArrayList<Step> stepList = new ArrayList<Step>();

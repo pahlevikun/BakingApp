@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,9 +31,6 @@ import com.udacity.bakingapp.pojo.Step;
 
 import java.util.ArrayList;
 
-/**
- * Created by derrickolivier on 3/01/15.
- */
 public class DescriptionFragment extends Fragment {
 
     final static String KEY_POSITION = "position";
@@ -52,23 +48,24 @@ public class DescriptionFragment extends Fragment {
     private String SELECTED_POSITION = "SELECTED_POSITION", uri;
 
 
-    public DescriptionFragment(){
+    public DescriptionFragment() {
 
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        stepList = ((RecipeDetailActivity)getActivity()).stepList;
+        stepList = ((RecipeDetailActivity) getActivity()).stepList;
+        if (savedInstanceState != null) {
+            mCurrentPosition = savedInstanceState.getInt(KEY_POSITION);
+            Toast.makeText(getActivity(), "satu " + mCurrentPosition, Toast.LENGTH_SHORT).show();
+        }
     }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        if (savedInstanceState != null){
-            mCurrentPosition = savedInstanceState.getInt(KEY_POSITION);
-        }
         View view = inflater.inflate(R.layout.fragment_description, container, false);
 
         simpleExoPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.playerView);
@@ -80,19 +77,15 @@ public class DescriptionFragment extends Fragment {
         return view;
     }
 
-    public void setDescription(int descriptionIndex){
-        descriptionIndex = descriptionIndex-1;
-        if (descriptionIndex!=-1){
-            Toast.makeText(getActivity(), "!-1", Toast.LENGTH_SHORT).show();
+    public void setDescription(int descriptionIndex) {
+        descriptionIndex = descriptionIndex - 1;
+        if (descriptionIndex != -1) {
             textView.setText(stepList.get(descriptionIndex).getDescription());
 
             if (stepList.get(descriptionIndex).getVideoURL().isEmpty()) {
-                if (stepList.get(descriptionIndex).getThumbnailURL().isEmpty()){
-                    imageView.setVisibility(View.VISIBLE);
-                    simpleExoPlayerView.setVisibility(View.GONE);
-                }else {
-                    initializePlayer();
-                }
+                imageView.setVisibility(View.VISIBLE);
+                simpleExoPlayerView.setVisibility(View.GONE);
+                initializePlayer();
             } else {
                 imageView.setVisibility(View.GONE);
                 simpleExoPlayerView.setVisibility(View.VISIBLE);
@@ -100,26 +93,21 @@ public class DescriptionFragment extends Fragment {
             }
             mCurrentPosition = descriptionIndex;
         }
+
     }
 
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(KEY_POSITION,mCurrentPosition);
+        outState.putInt(KEY_POSITION, mCurrentPosition);
         outState.putLong(SELECTED_POSITION, position);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if (Util.SDK_INT > 23) {
-            initializePlayer();
-        }
-        Bundle args = getArguments();
-        if (args != null){
-            setDescription(args.getInt(KEY_POSITION));
-        } else if(mCurrentPosition != -1){
+        if (mCurrentPosition != -1) {
             setDescription(mCurrentPosition);
         }
     }
@@ -147,15 +135,37 @@ public class DescriptionFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (player != null) {
+            player.stop();
+            player.release();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (player != null) {
+            player.stop();
+            player.release();
+            player = null;
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (player != null) {
+            player.stop();
+            player.release();
+        }
+    }
+
     private void initializePlayer() {
-        try{
-            if (stepList.get(mCurrentPosition).getVideoURL().isEmpty()) {
-                if (!stepList.get(mCurrentPosition).getThumbnailURL().isEmpty()){
-                    uri=stepList.get(mCurrentPosition).getThumbnailURL();
-                }
-            } else {
-                uri=stepList.get(mCurrentPosition).getVideoURL();
-            }
+        try {
+            uri = stepList.get(mCurrentPosition).getVideoURL();
 
             String userAgent = Util.getUserAgent(getActivity(), "ExoPlayerBakingApp");
             TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
@@ -168,10 +178,10 @@ public class DescriptionFragment extends Fragment {
             MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(uri), new DefaultDataSourceFactory(getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
             player.prepare(mediaSource);
             player.setPlayWhenReady(true);
-            if (getResources().getBoolean(R.bool.isTablet)){
+            if (getResources().getBoolean(R.bool.isTablet)) {
                 simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             imageView.setVisibility(View.VISIBLE);
             simpleExoPlayerView.setVisibility(View.GONE);
         }
