@@ -25,10 +25,6 @@
             android:name=".RecipeDetailActivity"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity
-            android:name=".StepActivity"
-            android:theme="@style/AppTheme"
-            android:windowSoftInputMode="stateAlwaysHidden" />
 
         <service android:name=".widget.UpdateBakingService" />
 

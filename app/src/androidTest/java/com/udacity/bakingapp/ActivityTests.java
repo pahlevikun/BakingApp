@@ -29,13 +29,11 @@ public class ActivityTests {
     @Rule
     public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
 
-
     private IdlingResource mIdlingResource;
 
     @Before
     public void registerIdlingResource() {
         mIdlingResource = mActivityTestRule.getActivity().getIdlingResource();
-        // To prove that the test fails, omit this call:
         Espresso.registerIdlingResources(mIdlingResource);
     }
 
@@ -43,12 +41,6 @@ public class ActivityTests {
     public void checkText_RecipeActivity() {
         onView(ViewMatchers.withId(R.id.recyclerView)).perform(RecyclerViewActions.scrollToPosition(1));
         onView(withText("Brownies")).check(matches(isDisplayed()));
-    }
-
-    @Test
-    public void checkPlayerViewIsVisible_RecipeDetailActivity1() {
-        onView(ViewMatchers.withId(R.id.recyclerView)).perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
-        //onView(withId(R.id.playerView)).check(matches(isDisplayed()));
     }
 
     @After

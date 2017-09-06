@@ -9,9 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.udacity.bakingapp.MainActivity;
 import com.udacity.bakingapp.R;
 import com.udacity.bakingapp.RecipeDetailActivity;
-import com.udacity.bakingapp.StepActivity;
 import com.udacity.bakingapp.pojo.Recipe;
 import com.udacity.bakingapp.pojo.Step;
 
@@ -50,7 +50,7 @@ public class RecyclerDetailAdapter extends RecyclerView.Adapter<RecyclerDetailAd
                         movieData.get(i).getDescription(),
                         movieData.get(i).getVideoURL(),
                         movieData.get(i).getThumbnailURL());*/
-                Intent intent = new Intent(context, StepActivity.class);
+                Intent intent = new Intent(context, MainActivity.class);
                 intent.putExtra("id",i);
                 intent.putParcelableArrayListExtra("parcel",movieData);
                 context.startActivity(intent);
