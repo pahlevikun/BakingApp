@@ -79,13 +79,12 @@ public class StepActivity extends AppCompatActivity {
 
         textView.setText(stepList.get(id).getDescription());
 
-        Log.d("HASIL",getMimeType(stepList.get(id).getVideoURL())+"");
         if (stepList.get(id).getVideoURL().isEmpty()) {
-            if (getMimeType(stepList.get(id).getThumbnailURL()).equals("video/mp4")){
-                initializePlayer();
-            }else {
+            if (stepList.get(id).getThumbnailURL().isEmpty()){
                 imageView.setVisibility(View.VISIBLE);
                 simpleExoPlayerView.setVisibility(View.GONE);
+            }else {
+                initializePlayer();
             }
         } else {
             imageView.setVisibility(View.GONE);
@@ -176,27 +175,32 @@ public class StepActivity extends AppCompatActivity {
 
 
     private void initializePlayer() {
-        if (stepList.get(id).getVideoURL().isEmpty()) {
-            if (getMimeType(stepList.get(id).getThumbnailURL()).equals("video/mp4")){
-               uri=stepList.get(id).getThumbnailURL();
+        try{
+            if (stepList.get(id).getVideoURL().isEmpty()) {
+                if (!stepList.get(id).getThumbnailURL().isEmpty()){
+                    uri=stepList.get(id).getThumbnailURL();
+                }
+            } else {
+                uri=stepList.get(id).getVideoURL();
             }
-        } else {
-            uri=stepList.get(id).getVideoURL();
-        }
 
-        String userAgent = Util.getUserAgent(StepActivity.this, "ExoPlayerBakingApp");
-        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
-        DefaultTrackSelector trackSelector = new DefaultTrackSelector(handler, videoTrackSelectionFactory);
-        LoadControl loadControl = new DefaultLoadControl();
+            String userAgent = Util.getUserAgent(StepActivity.this, "ExoPlayerBakingApp");
+            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
+            DefaultTrackSelector trackSelector = new DefaultTrackSelector(handler, videoTrackSelectionFactory);
+            LoadControl loadControl = new DefaultLoadControl();
 
-        player = ExoPlayerFactory.newSimpleInstance(StepActivity.this, trackSelector, loadControl);
-        simpleExoPlayerView.setPlayer(player);
+            player = ExoPlayerFactory.newSimpleInstance(StepActivity.this, trackSelector, loadControl);
+            simpleExoPlayerView.setPlayer(player);
 
-        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(uri), new DefaultDataSourceFactory(StepActivity.this, userAgent), new DefaultExtractorsFactory(), null, null);
-        player.prepare(mediaSource);
-        player.setPlayWhenReady(true);
-        if (getResources().getBoolean(R.bool.isTablet)){
-            simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
+            MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(uri), new DefaultDataSourceFactory(StepActivity.this, userAgent), new DefaultExtractorsFactory(), null, null);
+            player.prepare(mediaSource);
+            player.setPlayWhenReady(true);
+            if (getResources().getBoolean(R.bool.isTablet)){
+                simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
+            }
+        }catch (Exception e){
+            imageView.setVisibility(View.VISIBLE);
+            simpleExoPlayerView.setVisibility(View.GONE);
         }
     }
 
