@@ -42,7 +42,7 @@ public class DescriptionFragment extends Fragment {
 
 
     private ArrayList<Step> stepList = new ArrayList<Step>();
-    private ImageView imageView, imagePrev, imageNext;
+    private ImageView imageView;
     private TextView textView;
     private SimpleExoPlayerView simpleExoPlayerView;
     private SimpleExoPlayer player;
@@ -74,8 +74,6 @@ public class DescriptionFragment extends Fragment {
         simpleExoPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.playerView);
         imageView = (ImageView) view.findViewById(R.id.imageView);
         textView = (TextView) view.findViewById(R.id.textViewStep);
-        imagePrev = (ImageView) view.findViewById(R.id.imageViewPrevious);
-        imageNext = (ImageView) view.findViewById(R.id.imageViewNext);
         handler = new Handler();
         bandwidthMeter = new DefaultBandwidthMeter();
 
