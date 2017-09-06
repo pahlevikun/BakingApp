@@ -5,10 +5,12 @@ import android.net.Uri;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +46,8 @@ public class StepActivity extends AppCompatActivity {
     private BandwidthMeter bandwidthMeter;
     private Handler handler;
     private int id;
+    private long position;
+    private String SELECTED_POSITION = "SELECTED_POSITION", uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +78,15 @@ public class StepActivity extends AppCompatActivity {
         }
 
         textView.setText(stepList.get(id).getDescription());
+
+        Log.d("HASIL",getMimeType(stepList.get(id).getVideoURL())+"");
         if (stepList.get(id).getVideoURL().isEmpty()) {
-            imageView.setVisibility(View.VISIBLE);
-            simpleExoPlayerView.setVisibility(View.GONE);
+            if (getMimeType(stepList.get(id).getThumbnailURL()).equals("video/mp4")){
+                initializePlayer();
+            }else {
+                imageView.setVisibility(View.VISIBLE);
+                simpleExoPlayerView.setVisibility(View.GONE);
+            }
         } else {
             imageView.setVisibility(View.GONE);
             simpleExoPlayerView.setVisibility(View.VISIBLE);
@@ -133,12 +143,18 @@ public class StepActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
+        if (player != null) {
+            position = player.getCurrentPosition();
+            player.stop();
+            player.release();
+            player = null;
+        }
         if (Util.SDK_INT <= 23) {
             releasePlayer();
         }
     }
 
-    @Override
+    /*@Override
     public void onStop() {
         super.onStop();
         if (Util.SDK_INT > 23) {
@@ -150,9 +166,24 @@ public class StepActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         releasePlayer();
+    }*/
+
+    @Override
+    public void onSaveInstanceState(Bundle currentState) {
+        super.onSaveInstanceState(currentState);
+        currentState.putLong(SELECTED_POSITION, position);
     }
 
+
     private void initializePlayer() {
+        if (stepList.get(id).getVideoURL().isEmpty()) {
+            if (getMimeType(stepList.get(id).getThumbnailURL()).equals("video/mp4")){
+               uri=stepList.get(id).getThumbnailURL();
+            }
+        } else {
+            uri=stepList.get(id).getVideoURL();
+        }
+
         String userAgent = Util.getUserAgent(StepActivity.this, "ExoPlayerBakingApp");
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
         DefaultTrackSelector trackSelector = new DefaultTrackSelector(handler, videoTrackSelectionFactory);
@@ -161,9 +192,12 @@ public class StepActivity extends AppCompatActivity {
         player = ExoPlayerFactory.newSimpleInstance(StepActivity.this, trackSelector, loadControl);
         simpleExoPlayerView.setPlayer(player);
 
-        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(stepList.get(id).getVideoURL()), new DefaultDataSourceFactory(StepActivity.this, userAgent), new DefaultExtractorsFactory(), null, null);
+        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(uri), new DefaultDataSourceFactory(StepActivity.this, userAgent), new DefaultExtractorsFactory(), null, null);
         player.prepare(mediaSource);
         player.setPlayWhenReady(true);
+        if (getResources().getBoolean(R.bool.isTablet)){
+            simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
+        }
     }
 
     private void releasePlayer() {
@@ -171,6 +205,15 @@ public class StepActivity extends AppCompatActivity {
             player.release();
             player = null;
         }
+    }
+
+    public static String getMimeType(String url) {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return type;
     }
 
     @Override

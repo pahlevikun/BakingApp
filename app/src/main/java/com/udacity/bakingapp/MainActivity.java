@@ -48,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog loading;
 
     private ArrayList<Recipe> recipeList = new ArrayList<Recipe>();
-    private ArrayList<Step> stepList = new ArrayList<Step>();
-    private ArrayList<Ingredient> ingredientList = new ArrayList<Ingredient>();
+    private ArrayList<Step> stepList;
+    private ArrayList<Ingredient> ingredientList;
 
     private RecyclerView recyclerView;
     private RecyclerAdapter adapter;
@@ -104,8 +104,8 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             JSONArray jsonArray = new JSONArray(response);
                             for (int i = 0; i < jsonArray.length(); i++) {
-                                ingredientList.clear();
-                                stepList.clear();
+                                stepList = new ArrayList<Step>();
+                                ingredientList = new ArrayList<Ingredient>();
                                 JSONObject recipe = jsonArray.getJSONObject(i);
                                 int id = recipe.getInt("id");
                                 String name = recipe.getString("name");
@@ -120,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
                                     String ingredient = ingredients.getString("ingredient");
                                     ingredientList.add(new Ingredient(j, quantity, measure, ingredient));
                                 }
+                                Log.d("HASIL","Ingredients : "+ingredientList.size());
 
                                 JSONArray stepsArray = recipe.getJSONArray("steps");
                                 for (int k = 0; k < stepsArray.length(); k++) {
@@ -131,11 +132,14 @@ public class MainActivity extends AppCompatActivity {
                                     String thumbnailURL = steps.getString("thumbnailURL");
                                     stepList.add(new Step(idSteps, shortDescription, description, videoURL, thumbnailURL));
                                 }
-                                Log.d("HASIL",""+stepList.size());
+                                Log.d("HASIL","Steps : "+stepList.size());
                                 recipeList.add(new Recipe(id, name, ingredientList, stepList, servings, image));
                                 adapter.notifyDataSetChanged();
                             }
-                            Log.d("HASIL",""+recipeList.size()+" Resep"+recipeList.get(1).getIngredients().size()+"\n"+recipeList.get(1).getName());
+                            Log.d("HASIL",""+recipeList.size()+"\nIngredients "+recipeList.get(0).getIngredients().size()+"\n"+recipeList.get(0).getName());                            Log.d("HASIL",""+recipeList.size()+"\nIngredients "+recipeList.get(2).getIngredients().size()+"\n"+recipeList.get(2).getName());
+                            Log.d("HASIL",""+recipeList.size()+"\nIngredients "+recipeList.get(1).getIngredients().size()+"\n"+recipeList.get(1).getName());
+                            Log.d("HASIL",""+recipeList.size()+"\nIngredients "+recipeList.get(2).getIngredients().size()+"\n"+recipeList.get(2).getName());
+                            Log.d("HASIL",""+recipeList.size()+"\nIngredients "+recipeList.get(3).getIngredients().size()+"\n"+recipeList.get(3).getName());
                         } catch (Exception e) {
 
                         }
