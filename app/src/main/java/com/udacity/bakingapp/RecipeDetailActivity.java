@@ -3,16 +3,12 @@ package com.udacity.bakingapp;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.udacity.bakingapp.adapter.RecyclerDetailAdapter;
+import com.udacity.bakingapp.config.OnDataPass;
 import com.udacity.bakingapp.config.OnVersionNameSelectionChangeListener;
 import com.udacity.bakingapp.pojo.Ingredient;
 import com.udacity.bakingapp.pojo.Recipe;
@@ -25,21 +21,27 @@ import java.util.ArrayList;
  * Created by farhan on 9/3/17.
  */
 
-public class RecipeDetailActivity extends AppCompatActivity implements OnVersionNameSelectionChangeListener {
+public class RecipeDetailActivity extends AppCompatActivity implements OnVersionNameSelectionChangeListener, OnDataPass {
 
-    private int id;
-
+    private int ids=0, id;
     public StringBuffer temp = new StringBuffer();
-
-    private static String STACK_RECIPE_DETAIL = "STACK_RECIPE_DETAIL";
 
     private ArrayList<Ingredient> ingredientList = new ArrayList<Ingredient>();
     private ArrayList<Recipe> recipeList = new ArrayList<Recipe>();
     public ArrayList<Step> stepList = new ArrayList<Step>();
 
+    final static String KEY_POSITION = "POSITION";
+    final static String ARRAY_STEP = "STEPLIST";
+    final static String FRAGMENT = "FRAGMENT";
+
+    private DescriptionFragment descriptionFragment = new DescriptionFragment();
+    private OnDataPass onDataPass;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        onDataPass = (OnDataPass) this;
+
         setContentView(R.layout.activity_recipe_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -50,7 +52,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnVersion
         if (intent != null) {
             setTitle(intent.getStringExtra("title"));
             if (intent.hasExtra("parcel")) {
-                //recipe = intent.getParcelableExtra("parcel");
                 recipeList = intent.getParcelableArrayListExtra("parcel");
                 id = intent.getIntExtra("id", 0);
             } else {
@@ -59,8 +60,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnVersion
         }
         stepList = recipeList.get(id).getSteps();
         ingredientList = recipeList.get(id).getIngredients();
+        passData(stepList,ids);
 
-        Log.d("HASIL", "" + stepList.size());
         ArrayList<String> recipeIngredientsForWidgets = new ArrayList<>();
 
         for (int i = 0; i < ingredientList.size(); i++) {
@@ -73,36 +74,59 @@ public class RecipeDetailActivity extends AppCompatActivity implements OnVersion
 
         if (findViewById(R.id.fragment_container) != null) {
             if (savedInstanceState != null) {
-                return;
+                descriptionFragment.setDescription(ids);
+            } else {
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList(DescriptionFragment.ARRAY_STEP, stepList);
+                VersionsFragment versionsFragment = new VersionsFragment();
+                versionsFragment.setArguments(bundle);
+                getFragmentManager().beginTransaction()
+                        .add(R.id.fragment_container, versionsFragment)
+                        .commit();
             }
-            Bundle bundle = new Bundle();
-            bundle.putParcelableArrayList("arraylist", stepList);
-            VersionsFragment versionsFragment = new VersionsFragment();
-            versionsFragment.setArguments(bundle);
-            getFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, versionsFragment)
-                    .commit();
         }
     }
 
     @Override
     public void OnSelectionChanged(int versionNameIndex) {
-        DescriptionFragment descriptionFragment = (DescriptionFragment) getFragmentManager()
-                .findFragmentById(R.id.description_fragment);
+        DescriptionFragment descriptionFragment = (DescriptionFragment) getFragmentManager().findFragmentById(R.id.description_fragment);
+        ids = versionNameIndex;
+            if (descriptionFragment != null ) {
+                descriptionFragment.setDescription(versionNameIndex);
+            } else {
+                DescriptionFragment newDesriptionFragment = new DescriptionFragment();
+                Bundle args = new Bundle();
+                args.putInt(KEY_POSITION, versionNameIndex);
+                args.putParcelableArrayList(ARRAY_STEP, stepList);
+                newDesriptionFragment.setArguments(args);
+                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, newDesriptionFragment,FRAGMENT);
+                fragmentTransaction.commit();
+            }
+    }
 
-        if (descriptionFragment != null) {
-            descriptionFragment.setDescription(versionNameIndex);
-        } else {
-            DescriptionFragment newDesriptionFragment = new DescriptionFragment();
-            Bundle args = new Bundle();
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(KEY_POSITION, ids);
+        outState.putParcelableArrayList(ARRAY_STEP, stepList);
+        passData(stepList,ids);
+    }
+//
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//    }
 
-            args.putInt(DescriptionFragment.KEY_POSITION, versionNameIndex);
-            args.putParcelableArrayList("arraylist", stepList);
-            newDesriptionFragment.setArguments(args);
-            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, newDesriptionFragment);
-            fragmentTransaction.commit();
-        }
+    public void passData(ArrayList<Step> arrayList,int index) {
+        onDataPass.onDataPass(arrayList,index);
+    }
+
+    @Override
+    public void onDataPass(ArrayList<Step> arrayList, int index) {
+        stepList = arrayList;
+        ids = index;
+        Log.d("HASILFRAG","Interface Act "+ids);
     }
 
     @Override
