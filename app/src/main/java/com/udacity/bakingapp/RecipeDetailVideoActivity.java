@@ -100,6 +100,7 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
         try{
             Log.d("HASILFRAG", "12 Set Description");
             posisiSekarang = descriptionIndex;
+            Log.d("POSISI","SET DESC 1 POSISI "+positionExo);
             Log.d("HASIL","keempat "+stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")+" "+stepList.get(descriptionIndex).getVideoURL());
             if (descriptionIndex > -1) {
                 textView.setText(stepList.get(descriptionIndex).getDescription());
@@ -128,8 +129,12 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
             releasePlayer();
             initializePlayer();
             player.seekTo(positionExo);
+            Log.d("POSISI","SET DESC 2 POSISI "+positionExo);
         }else{
+            releasePlayer();
             initializePlayer();
+            player.seekTo(positionExo);
+            Log.d("POSISI","SET DESC 3 POSISI "+positionExo);
         }
     }
 
