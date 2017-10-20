@@ -47,7 +47,7 @@ public class RecipeDetailFragment extends Fragment {
     private SimpleExoPlayer player;
     private BandwidthMeter bandwidthMeter;
     private Handler handler;
-    private long position;
+    private long positionExo;
     private String uri;
 
 
@@ -62,13 +62,22 @@ public class RecipeDetailFragment extends Fragment {
         if (savedInstanceState != null && savedInstanceState.containsKey(KEY_POSITION)) {
             posisiSekarang = savedInstanceState.getInt(KEY_POSITION);
             stepList = savedInstanceState.getParcelableArrayList(ARRAY_STEP);
-            Log.d("HASILFRAG", "9 stepList " + stepList.size() + " posisi " + posisiSekarang);
-            releasePlayer();
-            //initializePlayer();
+            positionExo = savedInstanceState.getLong(SELECTED_POSITION,0);
             setDescription(posisiSekarang);
         } else {
             stepList = ((RecipeDetailActivity) getActivity()).stepList;
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        positionExo = player.getCurrentPosition();
+        Log.d("HASILFRAG", "13 Simpan ke bundle");
+        outState.putInt(KEY_POSITION, posisiSekarang);
+        outState.putLong(SELECTED_POSITION, positionExo);
+        outState.putParcelableArrayList(ARRAY_STEP, stepList);
+        releasePlayer();
     }
 
 
@@ -87,6 +96,7 @@ public class RecipeDetailFragment extends Fragment {
         if (getArguments() != null && getArguments().containsKey(KEY_POSITION)) {
             Log.d("HASILFRAG", "11 Argument not null get argument");
             stepList = getArguments().getParcelableArrayList(ARRAY_STEP);
+            releasePlayer();
             setDescription(getArguments().getInt(KEY_POSITION));
         }
 
@@ -132,33 +142,40 @@ public class RecipeDetailFragment extends Fragment {
         }catch (Exception e){
 
         }
-
-    }
-
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Log.d("HASILFRAG", "13 Simpan ke bundle");
-        outState.putInt(KEY_POSITION, posisiSekarang);
-        outState.putLong(SELECTED_POSITION, position);
-        outState.putParcelableArrayList(ARRAY_STEP, stepList);
-        releasePlayer();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if ((Util.SDK_INT <= 23 || player == null)) {
+        Log.d("HASIL","URI "+uri);
+        if (player!=null){
+            releasePlayer();
             initializePlayer();
-            Log.d("HASIL", "exoplayer onResume");
+            player.seekTo(positionExo);
+        }else{
+            initializePlayer();
         }
     }
+
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        new Handler().postDelayed(new Thread() {
+//            @Override
+//            public void run() {
+//                if ((Util.SDK_INT <= 23 || player == null)) {
+//                    initializePlayer();
+//                    Log.d("HASIL", "exoplayer onResume");
+//
+//                }
+//                if (player!=null){
+//                    player.seekTo(positionExo);
+//                }
+//            }
+//        }, 100);
+//
+//    }
 
     @Override
     public void onPause() {
         super.onPause();
         if (Util.SDK_INT <= 23) {
+            positionExo = player.getCurrentPosition();
             releasePlayer();
         }
     }
@@ -189,6 +206,8 @@ public class RecipeDetailFragment extends Fragment {
                 if (getResources().getBoolean(R.bool.isTablet)) {
                     simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
                 }
+            }else{
+                player.seekTo(positionExo);
             }
         } catch (Exception e) {
             imageView.setVisibility(View.VISIBLE);
@@ -198,6 +217,7 @@ public class RecipeDetailFragment extends Fragment {
 
     private void releasePlayer() {
         if (player != null) {
+            player.stop();
             player.release();
             player = null;
         }
