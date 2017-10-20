@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.gson.Gson;
 import com.udacity.bakingapp.pojo.Ingredient;
 import com.udacity.bakingapp.pojo.Recipe;
@@ -159,17 +160,24 @@ public class RecipeDetailActivity extends AppCompatActivity /*implements OnRecip
                     ids = versionNameIndex;
                     SharedPreferences prefs = getSharedPreferences("BAKINGAPP", Context.MODE_PRIVATE);
                     prefs.edit().putInt("POSITION", ids).apply();
-                    if (recipeDetailFragment != null ) {
-                        recipeDetailFragment.setDescription(versionNameIndex);
-                    } else {
-                        RecipeDetailFragment newDesriptionFragment = new RecipeDetailFragment();
-                        Bundle args = new Bundle();
-                        args.putInt(KEY_POSITION, versionNameIndex);
-                        args.putParcelableArrayList(ARRAY_STEP, stepList);
-                        newDesriptionFragment.setArguments(args);
-                        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                        fragmentTransaction.replace(R.id.fragment_container, newDesriptionFragment,FRAGMENT);
-                        fragmentTransaction.commit();
+                    if (!getResources().getBoolean(R.bool.isTablet)) {
+                        Intent intent1 = new Intent(RecipeDetailActivity.this, RecipeVideoActivity.class);
+                        intent1.putExtra("ARRAY",stepList);
+                        intent1.putExtra("POSISIS",versionNameIndex);
+                        startActivity(intent1);
+                    }else {
+                        if (recipeDetailFragment != null) {
+                            recipeDetailFragment.setDescription(versionNameIndex);
+                        } else {
+                            RecipeDetailFragment newDesriptionFragment = new RecipeDetailFragment();
+                            Bundle args = new Bundle();
+                            args.putInt(KEY_POSITION, versionNameIndex);
+                            args.putParcelableArrayList(ARRAY_STEP, stepList);
+                            newDesriptionFragment.setArguments(args);
+                            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                            fragmentTransaction.replace(R.id.fragment_container, newDesriptionFragment, FRAGMENT);
+                            fragmentTransaction.commit();
+                        }
                     }
                 }
             }

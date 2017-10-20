@@ -46,37 +46,11 @@ public class RecipeListFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        if(savedInstanceState!=null){
-            final int[] position = savedInstanceState.getIntArray("SCROLLPOSITION");
-            Log.d("HASIL","SCROLLPOST "+position[0]+" "+position[1]);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if(position != null)
-                        scrollView.post(new Runnable() {
-                            public void run() {
-                                scrollView.scrollTo(position[0], position[1]);
-                            }
-                        });
-                }
-            }, 100);
-        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        int position = 0;
-//        if (layoutManager != null) {
-//            position = layoutManager.findFirstVisibleItemPosition();
-//        }
-//        outState.putString("position",""+recyclerView.getScrollY());
-//        SharedPreferences prefs = getActivity().getSharedPreferences("BAKINGAPP", Context.MODE_PRIVATE);
-//        prefs.edit().putInt("POSITION", position).apply();
-
-        outState.putIntArray("SCROLLPOSITION", new int[]{ scrollView.getScrollX(), scrollView.getScrollY()});
-        Log.d("POSITION",position+"  "+scrollView.getScrollY()+" "+scrollView.getScrollX());
     }
 
     @Override
@@ -85,7 +59,6 @@ public class RecipeListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         textView = (TextView) view.findViewById(R.id.text);
-        scrollView = (ScrollView) view.findViewById(R.id.scrollView);
         new Handler().postDelayed(new Thread() {
             @Override
             public void run() {
@@ -96,9 +69,7 @@ public class RecipeListFragment extends Fragment {
                     temp.append((i + 1) + ". " + ingredientList.get(i).getIngredient()
                             + "\t(" + ingredientList.get(i).getQuantity() + " " + ingredientList.get(i).getMeasure() + ")\n");
                 }
-
                 textView.setText(temp+"");
-
                 FragmentAdapter adapter1 = new FragmentAdapter(getActivity(),stepList,temp+"");
                 LinearLayoutManager layoutManager1 = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
                 recyclerView.setHasFixedSize(true);
