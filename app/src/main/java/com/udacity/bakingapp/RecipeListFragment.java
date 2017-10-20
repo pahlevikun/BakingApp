@@ -51,15 +51,13 @@ public class RecipeListFragment extends Fragment {
             final int[] position = savedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
             stepList = savedInstanceState.getParcelableArrayList("ARRAYSTEP");
             stepList = savedInstanceState.getParcelableArrayList("ARRAYINGREDIENTS");
+            Log.d("HASIL","POSISI AMBIL "+position[0]+","+position[1]);
             if (position != null)
                 scrollView.post(new Runnable() {
                     public void run() {
                         scrollView.scrollTo(position[0], position[1]);
                     }
                 });
-        }else {
-            stepList = ((RecipeDetailActivity) getActivity()).stepList;
-            ingredientList = ((RecipeDetailActivity) getActivity()).ingredientList;
         }
     }
 
@@ -69,27 +67,35 @@ public class RecipeListFragment extends Fragment {
         outState.putIntArray("ARTICLE_SCROLL_POSITION", new int[]{scrollView.getScrollX(), scrollView.getScrollY()});
         outState.putParcelableArrayList("ARRAYSTEP",stepList);
         outState.putParcelableArrayList("ARRAYINGREDIENTS",ingredientList);
+        Log.d("HASIL","POSISI SIMPAN "+scrollView.getScrollX()+","+scrollView.getScrollY());
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_list, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         textView = (TextView) view.findViewById(R.id.text);
         scrollView = (NestedScrollView) view.findViewById(R.id.scrollView);
-        if (savedInstanceState!=null){
-            stepList = savedInstanceState.getParcelableArrayList("ARRAYSTEP");
-            stepList = savedInstanceState.getParcelableArrayList("ARRAYINGREDIENTS");
-        }else{
-            stepList = ((RecipeDetailActivity) getActivity()).stepList;
-            ingredientList = ((RecipeDetailActivity) getActivity()).ingredientList;
-        }
         new Handler().postDelayed(new Thread() {
             @Override
             public void run() {
-//                stepList = ((RecipeDetailActivity) getActivity()).stepList;
-//                ingredientList = ((RecipeDetailActivity) getActivity()).ingredientList;
+
+                if (savedInstanceState != null) {
+                    final int[] position = savedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
+                    stepList = savedInstanceState.getParcelableArrayList("ARRAYSTEP");
+                    stepList = savedInstanceState.getParcelableArrayList("ARRAYINGREDIENTS");
+                    Log.d("HASIL","POSISI AMBIL "+position[0]+","+position[1]);
+                    if (position != null)
+                        scrollView.post(new Runnable() {
+                            public void run() {
+                                scrollView.scrollTo(position[0], position[1]);
+                            }
+                        });
+                }
+
+                stepList = ((RecipeDetailActivity) getActivity()).stepList;
+                ingredientList = ((RecipeDetailActivity) getActivity()).ingredientList;
 
                 for (int i = 0; i < ingredientList.size(); i++) {
                     temp.append((i + 1) + ". " + ingredientList.get(i).getIngredient()
