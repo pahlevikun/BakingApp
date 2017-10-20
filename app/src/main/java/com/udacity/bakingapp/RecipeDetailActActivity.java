@@ -123,13 +123,23 @@ public class RecipeDetailActActivity extends AppCompatActivity {
         outState.putParcelableArrayList(ARRAY_STEP, stepList);
         outState.putParcelableArrayList(ARRAY_STEP+"2", ingredientList);
 
+        for (int i = 0; i < ingredientList.size(); i++) {
+            temp.append((i + 1) + ". " + ingredientList.get(i).getIngredient()
+                    + "\t(" + ingredientList.get(i).getQuantity() + " " + ingredientList.get(i).getMeasure() + ")\n");
+        }
+        textView.setText(temp + "");
+        FragmentAdapter adapter1 = new FragmentAdapter(RecipeDetailActActivity.this, stepList, temp + "");
+        LinearLayoutManager layoutManager1 = new LinearLayoutManager(RecipeDetailActActivity.this, LinearLayoutManager.VERTICAL, false);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(layoutManager1);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(adapter1);
+
         SharedPreferences prefs = getSharedPreferences("BAKINGAPP", Context.MODE_PRIVATE);
         prefs.edit().putInt("POSITION", ids).apply();
 
 
         outState.putIntArray("ARTICLE_SCROLL_POSITION", new int[]{scrollView.getScrollX(), scrollView.getScrollY()});
-        outState.putParcelableArrayList("ARRAYSTEP",stepList);
-        outState.putParcelableArrayList("ARRAYINGREDIENTS",ingredientList);
     }
 
     @Override
@@ -140,11 +150,11 @@ public class RecipeDetailActActivity extends AppCompatActivity {
             stepList = savedInstanceState.getParcelableArrayList(ARRAY_STEP);
             ingredientList = savedInstanceState.getParcelableArrayList(ARRAY_STEP+"2");
 
+
+
             ids = savedInstanceState.getInt(KEY_POSITION,0);
 
             final int[] position = savedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
-            stepList = savedInstanceState.getParcelableArrayList("ARRAYSTEP");
-            stepList = savedInstanceState.getParcelableArrayList("ARRAYINGREDIENTS");
             if (position != null)
                 scrollView.post(new Runnable() {
                     public void run() {

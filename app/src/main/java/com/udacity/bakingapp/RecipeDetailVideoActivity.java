@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -54,7 +55,8 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState != null) {
             positionExo = savedInstanceState.getLong(SELECTED_POSITION, 0);
-            posisiSekarang = savedInstanceState.getInt("POSISISEKARANG",0);
+            posisiSekarang = savedInstanceState.getInt(KEY_POSITION);
+            stepList = savedInstanceState.getParcelableArrayList(ARRAY_STEP);
             Log.d("POSISI","AMBIL "+positionExo);
             releasePlayer();
             setDescription(posisiSekarang);
@@ -65,7 +67,8 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         positionExo = player.getCurrentPosition();
         outState.putLong(SELECTED_POSITION, positionExo);
-        outState.putInt("POSISISEKARANG",0);
+        outState.putInt(KEY_POSITION, posisiSekarang);
+        outState.putParcelableArrayList(ARRAY_STEP, stepList);
         releasePlayer();
         Log.d("POSISI", "SIMPAN " + positionExo);
     }
@@ -203,5 +206,20 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
             player.release();
             player = null;
         }
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 }
