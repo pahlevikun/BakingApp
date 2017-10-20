@@ -2,21 +2,24 @@ package com.udacity.bakingapp.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.udacity.bakingapp.MainActivity;
+import com.google.gson.Gson;
 import com.udacity.bakingapp.R;
 import com.udacity.bakingapp.RecipeDetailActivity;
+import com.udacity.bakingapp.pojo.Ingredient;
 import com.udacity.bakingapp.pojo.Recipe;
+import com.udacity.bakingapp.pojo.Step;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by farhan on 6/30/17.
@@ -24,17 +27,20 @@ import java.util.List;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
     private ArrayList<Recipe> movieData;
+    private ArrayList<Step> steps;
+    private ArrayList<Ingredient> ingredients;
     private Context context;
-    private Recipe recipe;
 
-    public RecyclerAdapter(Context context, ArrayList<Recipe> movieData) {
+    public RecyclerAdapter(Context context, ArrayList<Recipe> movieData, ArrayList<Ingredient> ingredients, ArrayList<Step> steps) {
         this.movieData = movieData;
         this.context = context;
+        this.steps = steps;
+        this.ingredients = ingredients;
     }
 
     @Override
     public RecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.adapter_movie, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.adapter_recycler, viewGroup, false);
         return new ViewHolder(view);
     }
 
@@ -45,20 +51,25 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         viewHolder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*recipe = new Recipe(movieData.get(i).getId(),
-                                    movieData.get(i).getName(),
-                                    movieData.get(i).getIngredients(),
-                                    movieData.get(i).getSteps(),
-                                    movieData.get(i).getServings(),
-                                    movieData.get(i).getImage());*/
                 Intent intent = new Intent(context, RecipeDetailActivity.class);
                 intent.putExtra("title",movieData.get(i).getName());
                 intent.putParcelableArrayListExtra("parcel",movieData);
                 intent.putExtra("id",i);
-                //intent.putExtra("parcel",recipe);
+
+                SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences.Editor editor = sharedPrefs.edit();
+                Gson gson = new Gson();
+                String json1 = gson.toJson(steps);
+                String json2 = gson.toJson(ingredients);
+                editor.putString("JSON1", json1);
+                editor.putString("JSON2", json2);
+                editor.commit();
+
+                Log.d("HASIL",""+json1);
                 context.startActivity(intent);
             }
         });
+
     }
 
     @Override

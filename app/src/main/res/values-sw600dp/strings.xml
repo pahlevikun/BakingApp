@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Baking App Udacity</string>
-    <string name="appwidget_text">RECIPE INGREDIENTS WILL APPEAR HERE AFTER LAUNCHING &quot;BAKING APP&quot;</string>
+    <string name="app_widget_init">Baking App Udacity Widget. Open app for update recipe!</string>
+    <string name="versionNameIndex">versionNameIndex</string>
+    <string name="receiverBakingApp">receiverBakingApp</string>
     <bool name="isTablet">true</bool>
 </resources>

@@ -26,24 +26,19 @@
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateAlwaysHidden" />
 
-        <service android:name=".widget.UpdateBakingService" />
-
-        <service
-            android:name=".widget.GridWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
-
         <receiver
-            android:name=".widget.BakingWidgetProvider"
-            android:icon="@drawable/ic_chrome_reader_mode_black_48dp">
+            android:name=".widget.WidgetProvider"
+            android:icon="@mipmap/ic_launcher"
+            android:label="Baking App Widget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE2" />
             </intent-filter>
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/baking_widget_info" />
+                android:resource="@xml/widget_info" />
         </receiver>
+
     </application>
 
 </manifest>

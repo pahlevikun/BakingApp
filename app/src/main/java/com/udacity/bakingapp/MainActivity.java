@@ -3,15 +3,10 @@ package com.udacity.bakingapp;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -29,7 +24,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.udacity.bakingapp.adapter.RecyclerAdapter;
 import com.udacity.bakingapp.config.APIConfig;
-import com.udacity.bakingapp.idle.SimpleIdlingResource;
 import com.udacity.bakingapp.pojo.Ingredient;
 import com.udacity.bakingapp.pojo.Recipe;
 import com.udacity.bakingapp.pojo.Step;
@@ -39,7 +33,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -55,18 +48,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
-    @Nullable
-    private SimpleIdlingResource mIdlingResource;
-
-    @VisibleForTesting
-    @NonNull
-    public IdlingResource getIdlingResource() {
-        if (mIdlingResource == null) {
-            mIdlingResource = new SimpleIdlingResource();
-        }
-        return mIdlingResource;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,8 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        adapter = new RecyclerAdapter(MainActivity.this,recipeList);
-        //layoutManager = new LinearLayoutManager(getApplicationContext());
+        adapter = new RecyclerAdapter(MainActivity.this,recipeList,ingredientList,stepList);
         if (getResources().getBoolean(R.bool.isTablet)){
             layoutManager = new GridLayoutManager(MainActivity.this,calculateNoOfColumns(MainActivity.this));
         }else{
