@@ -72,8 +72,6 @@ public class RecipeDetailActivity extends AppCompatActivity /*implements OnRecip
         stepList = recipeList.get(id).getSteps();
         ingredientList = recipeList.get(id).getIngredients();
 
-
-
         for (int i = 0; i < ingredientList.size(); i++) {
             temp.append((i + 1) + ". " + ingredientList.get(i).getIngredient()
                     + "\t(" + ingredientList.get(i).getQuantity() + " " + ingredientList.get(i).getMeasure() + ")\n");
@@ -116,6 +114,9 @@ public class RecipeDetailActivity extends AppCompatActivity /*implements OnRecip
         outState.putInt(KEY_POSITION, ids);
         outState.putParcelableArrayList(ARRAY_STEP, stepList);
         outState.putParcelableArrayList(ARRAY_STEP+"2", ingredientList);
+
+        SharedPreferences prefs = getSharedPreferences("BAKINGAPP", Context.MODE_PRIVATE);
+        prefs.edit().putInt("POSITION", ids).apply();
     }
 
     @Override
@@ -156,6 +157,8 @@ public class RecipeDetailActivity extends AppCompatActivity /*implements OnRecip
 
                     RecipeDetailFragment recipeDetailFragment = (RecipeDetailFragment) getFragmentManager().findFragmentById(R.id.description_fragment);
                     ids = versionNameIndex;
+                    SharedPreferences prefs = getSharedPreferences("BAKINGAPP", Context.MODE_PRIVATE);
+                    prefs.edit().putInt("POSITION", ids).apply();
                     if (recipeDetailFragment != null ) {
                         recipeDetailFragment.setDescription(versionNameIndex);
                     } else {

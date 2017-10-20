@@ -64,7 +64,7 @@ public class RecipeDetailFragment extends Fragment {
             stepList = savedInstanceState.getParcelableArrayList(ARRAY_STEP);
             Log.d("HASILFRAG", "9 stepList " + stepList.size() + " posisi " + posisiSekarang);
             releasePlayer();
-            initializePlayer();
+            //initializePlayer();
             setDescription(posisiSekarang);
         } else {
             stepList = ((RecipeDetailActivity) getActivity()).stepList;
@@ -94,31 +94,43 @@ public class RecipeDetailFragment extends Fragment {
     }
 
     public void setDescription(int descriptionIndex) {
-        Log.d("HASILFRAG", "12 Set Description");
-        posisiSekarang = descriptionIndex;
-        descriptionIndex = descriptionIndex - 1;
-        if (descriptionIndex > -1) {
-            textView.setText(stepList.get(descriptionIndex).getDescription());
+        try{
+            Log.d("HASILFRAG", "12 Set Description");
+            posisiSekarang = descriptionIndex;
+            Log.d("HASIL","keempat "+stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")+" "+stepList.get(descriptionIndex).getVideoURL());
+            if (descriptionIndex > -1) {
+                textView.setText(stepList.get(descriptionIndex).getDescription());
 
-            if (!stepList.get(descriptionIndex).getVideoURL().isEmpty()) {
-                imageView.setVisibility(View.GONE);
-                simpleExoPlayerView.setVisibility(View.VISIBLE);
-                uri = stepList.get(descriptionIndex).getVideoURL();
-                //initializePlayer();
-            } else {
-                if (isVideoFile(stepList.get(descriptionIndex).getThumbnailURL()) && !stepList.get(descriptionIndex).getThumbnailURL().isEmpty()) {
-                    uri = stepList.get(descriptionIndex).getThumbnailURL();
+                if (!stepList.get(descriptionIndex).getVideoURL().isEmpty()) {
                     imageView.setVisibility(View.GONE);
                     simpleExoPlayerView.setVisibility(View.VISIBLE);
+                    uri = stepList.get(descriptionIndex).getVideoURL();
                     //initializePlayer();
                 } else {
-                    imageView.setVisibility(View.VISIBLE);
-                    simpleExoPlayerView.setVisibility(View.GONE);
-                    if (!stepList.get(descriptionIndex).getThumbnailURL().isEmpty()) {
-                        Picasso.with(getActivity()).load(stepList.get(descriptionIndex).getThumbnailURL()).into(imageView);
+                    if (stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")){
+                        uri = stepList.get(descriptionIndex).getThumbnailURL();
+                        imageView.setVisibility(View.GONE);
+                        simpleExoPlayerView.setVisibility(View.VISIBLE);
+                    }else{
+                        imageView.setVisibility(View.VISIBLE);
+                        simpleExoPlayerView.setVisibility(View.GONE);
                     }
+//                if (isVideoFile(stepList.get(descriptionIndex).getThumbnailURL()) && !stepList.get(descriptionIndex).getThumbnailURL().isEmpty()) {
+//                    uri = stepList.get(descriptionIndex).getThumbnailURL();
+//                    imageView.setVisibility(View.GONE);
+//                    simpleExoPlayerView.setVisibility(View.VISIBLE);
+//                    //initializePlayer();
+//                } else {
+//                    imageView.setVisibility(View.VISIBLE);
+//                    simpleExoPlayerView.setVisibility(View.GONE);
+//                    if (!stepList.get(descriptionIndex).getThumbnailURL().isEmpty()) {
+//                        Picasso.with(getActivity()).load(stepList.get(descriptionIndex).getThumbnailURL()).into(imageView);
+//                    }
+//                }
                 }
             }
+        }catch (Exception e){
+
         }
 
     }

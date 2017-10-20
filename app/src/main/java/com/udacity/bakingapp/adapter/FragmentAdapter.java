@@ -39,9 +39,6 @@ public class FragmentAdapter extends RecyclerView.Adapter<FragmentAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(FragmentAdapter.ViewHolder viewHolder, final int i) {
-
-
-        if (i!=0){
             viewHolder.textView1.setText(movieData.get(i).getId() +". "+ movieData.get(i).getShortDescription());
             viewHolder.cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -51,9 +48,7 @@ public class FragmentAdapter extends RecyclerView.Adapter<FragmentAdapter.ViewHo
                     context.sendBroadcast(intent);
                 }
             });
-        }else{
-            viewHolder.textView1.setText(recipe);
-        }
+
     }
 
     @Override
