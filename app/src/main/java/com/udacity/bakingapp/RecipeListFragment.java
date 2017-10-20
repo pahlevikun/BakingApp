@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.NestedScrollView;
@@ -16,7 +15,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.udacity.bakingapp.adapter.FragmentAdapter;
@@ -94,8 +92,8 @@ public class RecipeListFragment extends Fragment {
                         });
                 }
 
-                stepList = ((RecipeDetailActivity) getActivity()).stepList;
-                ingredientList = ((RecipeDetailActivity) getActivity()).ingredientList;
+                stepList = ((RecipeDetailFragActivity) getActivity()).stepList;
+                ingredientList = ((RecipeDetailFragActivity) getActivity()).ingredientList;
 
                 for (int i = 0; i < ingredientList.size(); i++) {
                     temp.append((i + 1) + ". " + ingredientList.get(i).getIngredient()

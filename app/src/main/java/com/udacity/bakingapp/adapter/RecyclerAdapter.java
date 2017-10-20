@@ -14,8 +14,8 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.udacity.bakingapp.R;
-import com.udacity.bakingapp.RecipeDetailActivity;
-import com.udacity.bakingapp.RecipeDetailSPActivity;
+import com.udacity.bakingapp.RecipeDetailFragActivity;
+import com.udacity.bakingapp.RecipeDetailActActivity;
 import com.udacity.bakingapp.pojo.Ingredient;
 import com.udacity.bakingapp.pojo.Recipe;
 import com.udacity.bakingapp.pojo.Step;
@@ -53,7 +53,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             @Override
             public void onClick(View view) {
                 if (context.getResources().getBoolean(R.bool.isTablet)){
-                    Intent intent = new Intent(context, RecipeDetailActivity.class);
+                    Intent intent = new Intent(context, RecipeDetailFragActivity.class);
                     intent.putExtra("title",movieData.get(i).getName());
                     intent.putParcelableArrayListExtra("parcel",movieData);
                     intent.putExtra("id",i);
@@ -70,7 +70,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                     Log.d("HASIL",""+json1);
                     context.startActivity(intent);
                 }else{
-                    Intent intent = new Intent(context, RecipeDetailSPActivity.class);
+                    Intent intent = new Intent(context, RecipeDetailActActivity.class);
                     intent.putExtra("title",movieData.get(i).getName());
                     intent.putParcelableArrayListExtra("parcel",movieData);
                     intent.putExtra("id",i);

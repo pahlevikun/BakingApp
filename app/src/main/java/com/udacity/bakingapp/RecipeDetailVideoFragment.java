@@ -27,13 +27,12 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.squareup.picasso.Picasso;
 import com.udacity.bakingapp.pojo.Step;
 
 import java.net.URLConnection;
 import java.util.ArrayList;
 
-public class RecipeDetailFragment extends Fragment {
+public class RecipeDetailVideoFragment extends Fragment {
 
     final static String KEY_POSITION = "POSITION";
     final static String SELECTED_POSITION = "SELECTED_POSITION";
@@ -51,7 +50,7 @@ public class RecipeDetailFragment extends Fragment {
     private String uri;
 
 
-    public RecipeDetailFragment() {
+    public RecipeDetailVideoFragment() {
 
     }
 
@@ -63,9 +62,10 @@ public class RecipeDetailFragment extends Fragment {
             posisiSekarang = savedInstanceState.getInt(KEY_POSITION);
             stepList = savedInstanceState.getParcelableArrayList(ARRAY_STEP);
             positionExo = savedInstanceState.getLong(SELECTED_POSITION,0);
+            releasePlayer();
             setDescription(posisiSekarang);
         } else {
-            stepList = ((RecipeDetailActivity) getActivity()).stepList;
+            stepList = ((RecipeDetailFragActivity) getActivity()).stepList;
         }
     }
 

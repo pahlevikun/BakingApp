@@ -1,7 +1,5 @@
 package com.udacity.bakingapp;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.PersistableBundle;
@@ -13,7 +11,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
@@ -34,7 +31,7 @@ import com.udacity.bakingapp.pojo.Step;
 
 import java.util.ArrayList;
 
-public class RecipeVideoActivity extends AppCompatActivity {
+public class RecipeDetailVideoActivity extends AppCompatActivity {
 
     final static String KEY_POSITION = "POSITION";
     final static String SELECTED_POSITION = "SELECTED_POSITION";
@@ -50,6 +47,28 @@ public class RecipeVideoActivity extends AppCompatActivity {
     private BandwidthMeter bandwidthMeter;
     private Handler handler;
     private String uri;
+    private long positionExo;
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            positionExo = savedInstanceState.getLong(SELECTED_POSITION, 0);
+            posisiSekarang = savedInstanceState.getInt("POSISISEKARANG",0);
+            Log.d("POSISI","AMBIL "+positionExo);
+            releasePlayer();
+            setDescription(posisiSekarang);
+        }
+    }
+
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        positionExo = player.getCurrentPosition();
+        outState.putLong(SELECTED_POSITION, positionExo);
+        outState.putInt("POSISISEKARANG",0);
+        releasePlayer();
+        Log.d("POSISI", "SIMPAN " + positionExo);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,20 +88,16 @@ public class RecipeVideoActivity extends AppCompatActivity {
         stepList = getIntent().getParcelableArrayListExtra("ARRAY");
         posisiSekarang = getIntent().getIntExtra("POSISIS", 0);
         Log.d("HASIL", stepList.size() + " " + posisiSekarang);
+        releasePlayer();
         setDescription(posisiSekarang);
-
-        if (savedInstanceState != null) {
-            videoPost = savedInstanceState.getLong(SELECTED_POSITION, 0);
-            Log.d("POSISI","AMBIL BUAT "+videoPost);
-        }
 
     }
 
     public void setDescription(int descriptionIndex) {
-        try {
+        try{
             Log.d("HASILFRAG", "12 Set Description");
             posisiSekarang = descriptionIndex;
-            Log.d("HASIL", "keempat " + stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4") + " " + stepList.get(descriptionIndex).getVideoURL());
+            Log.d("HASIL","keempat "+stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")+" "+stepList.get(descriptionIndex).getVideoURL());
             if (descriptionIndex > -1) {
                 textView.setText(stepList.get(descriptionIndex).getDescription());
 
@@ -92,40 +107,48 @@ public class RecipeVideoActivity extends AppCompatActivity {
                     uri = stepList.get(descriptionIndex).getVideoURL();
                     //initializePlayer();
                 } else {
-                    if (stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")) {
+                    if (stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")){
                         uri = stepList.get(descriptionIndex).getThumbnailURL();
                         imageView.setVisibility(View.GONE);
                         simpleExoPlayerView.setVisibility(View.VISIBLE);
-                    } else {
+                    }else{
                         imageView.setVisibility(View.VISIBLE);
                         simpleExoPlayerView.setVisibility(View.GONE);
                     }
                 }
             }
-        } catch (Exception e) {
+        }catch (Exception e){
 
         }
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if ((Util.SDK_INT <= 23 || player == null)) {
-            initializePlayer(Uri.parse(uri));
-            player.seekTo(videoPost);
-            Log.d("HASIL", "exoplayer onResume");
-        }
-        if (player != null){
-            player.seekTo(videoPost);
-            Log.d("POSISI", "RESUME " + videoPost);
+        Log.d("HASIL","URI "+uri);
+        if (player!=null){
+            releasePlayer();
+            initializePlayer();
+            player.seekTo(positionExo);
+        }else{
+            initializePlayer();
         }
     }
+
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        if ((Util.SDK_INT <= 23 || player == null)) {
+//            initializePlayer(Uri.parse(uri));
+//            player.seekTo(videoPost);
+//            Log.d("HASIL", "exoplayer onResume");
+//        }
+//        if (player != null){
+//            player.seekTo(videoPost);
+//            Log.d("POSISI", "RESUME " + videoPost);
+//        }
+//    }
 
     @Override
     public void onPause() {
         super.onPause();
         if (Util.SDK_INT <= 23) {
+            positionExo = player.getCurrentPosition();
             releasePlayer();
         }
     }
@@ -133,71 +156,50 @@ public class RecipeVideoActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        //if (Util.SDK_INT > 23) {
+        if (Util.SDK_INT > 23) {
             releasePlayer();
-        //}
-
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        videoPost = player.getCurrentPosition();
-        outState.putLong(SELECTED_POSITION, videoPost);
-        Log.d("POSISI", "SIMPAN " + videoPost);
-
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            videoPost = savedInstanceState.getLong(SELECTED_POSITION, 0);
-            Log.d("POSISI","AMBIL "+videoPost);
         }
     }
 
-//    private void initializePlayer() {
-//        try {
-//            if (player == null) {
-//                Log.d("HASIL", "" + uri + " Exoplayer");
-//                String userAgent = Util.getUserAgent(RecipeVideoActivity.this, "ExoPlayerBakingApp");
-//                TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
-//                DefaultTrackSelector trackSelector = new DefaultTrackSelector(handler, videoTrackSelectionFactory);
-//                LoadControl loadControl = new DefaultLoadControl();
+//    @Override
+//    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+//        super.onSaveInstanceState(outState, outPersistentState);
+//        positionExo = player.getCurrentPosition();
+//        outState.putLong(SELECTED_POSITION, positionExo);
+//        Log.d("POSISI", "SIMPAN " + positionExo);
 //
-//                player = ExoPlayerFactory.newSimpleInstance(RecipeVideoActivity.this, trackSelector, loadControl);
-//                simpleExoPlayerView.setPlayer(player);
-//
-//                MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(uri), new DefaultDataSourceFactory(RecipeVideoActivity.this, userAgent), new DefaultExtractorsFactory(), null, null);
-//                player.prepare(mediaSource);
-//                player.setPlayWhenReady(true);
-//                if (getResources().getBoolean(R.bool.isTablet)) {
-//                    simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
-//                }
-//            }
-//        } catch (Exception e) {
-//            imageView.setVisibility(View.VISIBLE);
-//            simpleExoPlayerView.setVisibility(View.GONE);
-//        }
 //    }
 
-    private void initializePlayer(Uri mediaUri) {
-        if (player == null) {
-            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
-            DefaultTrackSelector trackSelector = new DefaultTrackSelector(handler, videoTrackSelectionFactory);
-            LoadControl loadControl = new DefaultLoadControl();
-            player = ExoPlayerFactory.newSimpleInstance(RecipeVideoActivity.this, trackSelector, loadControl);
-            simpleExoPlayerView.setPlayer(player);
-            String userAgent = Util.getUserAgent(RecipeVideoActivity.this, "Baking App");
-            MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(RecipeVideoActivity.this, userAgent), new DefaultExtractorsFactory(), null, null);
-            player.prepare(mediaSource);
-            player.setPlayWhenReady(true);
+    private void initializePlayer() {
+        try {
+            if (player == null) {
+                Log.d("HASIL", "" + uri + " Exoplayer");
+                String userAgent = Util.getUserAgent(RecipeDetailVideoActivity.this, "ExoPlayerBakingApp");
+                TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
+                DefaultTrackSelector trackSelector = new DefaultTrackSelector(handler, videoTrackSelectionFactory);
+                LoadControl loadControl = new DefaultLoadControl();
+
+                player = ExoPlayerFactory.newSimpleInstance(RecipeDetailVideoActivity.this, trackSelector, loadControl);
+                simpleExoPlayerView.setPlayer(player);
+
+                MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(uri), new DefaultDataSourceFactory(RecipeDetailVideoActivity.this, userAgent), new DefaultExtractorsFactory(), null, null);
+                player.prepare(mediaSource);
+                player.setPlayWhenReady(true);
+                if (getResources().getBoolean(R.bool.isTablet)) {
+                    simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
+                }
+            }else{
+                player.seekTo(positionExo);
+            }
+        } catch (Exception e) {
+            imageView.setVisibility(View.VISIBLE);
+            simpleExoPlayerView.setVisibility(View.GONE);
         }
     }
 
     private void releasePlayer() {
         if (player != null) {
+            player.stop();
             player.release();
             player = null;
         }

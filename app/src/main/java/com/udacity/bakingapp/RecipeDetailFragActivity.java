@@ -8,18 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.udacity.bakingapp.adapter.FragmentAdapter;
 import com.udacity.bakingapp.pojo.Ingredient;
 import com.udacity.bakingapp.pojo.Recipe;
 import com.udacity.bakingapp.pojo.Step;
@@ -31,9 +25,14 @@ import java.util.ArrayList;
  * Created by farhan on 9/3/17.
  */
 
-public class RecipeDetailSPActivity extends AppCompatActivity {
+public class RecipeDetailFragActivity extends AppCompatActivity /*implements OnRecipeSelect */{
 
     private int ids=0, id;
+    public StringBuffer temp = new StringBuffer();
+
+    public ArrayList<Ingredient> ingredientList = new ArrayList<Ingredient>();
+    private ArrayList<Recipe> recipeList = new ArrayList<Recipe>();
+    public ArrayList<Step> stepList = new ArrayList<Step>();
 
     private SharedPreferences shared;
     private LinearLayout linearLayout;
@@ -42,32 +41,20 @@ public class RecipeDetailSPActivity extends AppCompatActivity {
     final static String ARRAY_STEP = "STEPLIST";
     final static String FRAGMENT = "FRAGMENT";
 
-    private RecipeDetailFragment recipeDetailFragment = new RecipeDetailFragment();
+    private RecipeDetailVideoFragment recipeDetailVideoFragment = new RecipeDetailVideoFragment();
 
-    private ArrayList<Step> stepList = new ArrayList<Step>();
-    private ArrayList<Ingredient> ingredientList = new ArrayList<Ingredient>();
-    private ArrayList<Recipe> recipeList = new ArrayList<Recipe>();
-    private String[] versionName;
-    private RecyclerView recyclerView;
-    private TextView textView;
-    private FragmentAdapter adapter;
-    private LinearLayoutManager layoutManager;
-    public StringBuffer temp = new StringBuffer();
     private BroadcastReceiver broadcastReceiver;
-    private NestedScrollView scrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recipe_detail_sp);
+        setContentView(R.layout.activity_recipe_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        textView = (TextView) findViewById(R.id.text);
-        scrollView = (NestedScrollView) findViewById(R.id.scrollView);
+        linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -79,7 +66,6 @@ public class RecipeDetailSPActivity extends AppCompatActivity {
                 finish();
             }
         }
-
         stepList = recipeList.get(id).getSteps();
         ingredientList = recipeList.get(id).getIngredients();
 
@@ -94,25 +80,27 @@ public class RecipeDetailSPActivity extends AppCompatActivity {
             editor.apply();
             Log.d("HASILSHARED",""+temp);
 
-            Intent updateWidget = new Intent(RecipeDetailSPActivity.this, WidgetProvider.class);
+            Intent updateWidget = new Intent(RecipeDetailFragActivity.this, WidgetProvider.class);
             updateWidget.setAction("update_widget");
-            PendingIntent pending = PendingIntent.getBroadcast(RecipeDetailSPActivity.this, 0, updateWidget, PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent pending = PendingIntent.getBroadcast(RecipeDetailFragActivity.this, 0, updateWidget, PendingIntent.FLAG_CANCEL_CURRENT);
             pending.send();
         }catch (Exception e){
             Log.d("EXCEPTION",""+e);
         }
 
-        for (int i = 0; i < ingredientList.size(); i++) {
-            temp.append((i + 1) + ". " + ingredientList.get(i).getIngredient()
-                    + "\t(" + ingredientList.get(i).getQuantity() + " " + ingredientList.get(i).getMeasure() + ")\n");
+        if (findViewById(R.id.fragment_container) != null) {
+//            if (savedInstanceState != null) {
+//                recipeDetailFragment.setDescription(ids);
+//            } else {
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList(RecipeDetailVideoFragment.ARRAY_STEP, stepList);
+                RecipeListFragment recipeListFragment = new RecipeListFragment();
+                recipeListFragment.setArguments(bundle);
+                getFragmentManager().beginTransaction()
+                        .add(R.id.fragment_container, recipeListFragment)
+                        .commit();
+//            }
         }
-        textView.setText(temp + "");
-        FragmentAdapter adapter1 = new FragmentAdapter(RecipeDetailSPActivity.this, stepList, temp + "");
-        LinearLayoutManager layoutManager1 = new LinearLayoutManager(RecipeDetailSPActivity.this, LinearLayoutManager.VERTICAL, false);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(layoutManager1);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(adapter1);
 
         destroyActivity();
     }
@@ -126,11 +114,6 @@ public class RecipeDetailSPActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences("BAKINGAPP", Context.MODE_PRIVATE);
         prefs.edit().putInt("POSITION", ids).apply();
-
-
-        outState.putIntArray("ARTICLE_SCROLL_POSITION", new int[]{scrollView.getScrollX(), scrollView.getScrollY()});
-        outState.putParcelableArrayList("ARRAYSTEP",stepList);
-        outState.putParcelableArrayList("ARRAYINGREDIENTS",ingredientList);
     }
 
     @Override
@@ -143,15 +126,19 @@ public class RecipeDetailSPActivity extends AppCompatActivity {
 
             ids = savedInstanceState.getInt(KEY_POSITION,0);
 
-            final int[] position = savedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
-            stepList = savedInstanceState.getParcelableArrayList("ARRAYSTEP");
-            stepList = savedInstanceState.getParcelableArrayList("ARRAYINGREDIENTS");
-            if (position != null)
-                scrollView.post(new Runnable() {
-                    public void run() {
-                        scrollView.scrollTo(position[0], position[1]);
-                    }
-                });
+            RecipeDetailVideoFragment recipeDetailVideoFragment = (RecipeDetailVideoFragment) getFragmentManager().findFragmentById(R.id.description_fragment);
+            if (recipeDetailVideoFragment != null ) {
+                recipeDetailVideoFragment.setDescription(ids);
+            } else {
+                RecipeDetailVideoFragment newDesriptionFragment = new RecipeDetailVideoFragment();
+                Bundle args = new Bundle();
+                args.putInt(KEY_POSITION, ids);
+                args.putParcelableArrayList(ARRAY_STEP, stepList);
+                newDesriptionFragment.setArguments(args);
+                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, newDesriptionFragment,FRAGMENT);
+                fragmentTransaction.commit();
+            }
 
         }
     }
@@ -164,15 +151,29 @@ public class RecipeDetailSPActivity extends AppCompatActivity {
                 String action = intent.getAction();
                 if (action.equals(getString(R.string.receiverBakingApp))) {
                     int versionNameIndex = intent.getExtras().getInt(getString(R.string.versionNameIndex));
+
+                    RecipeDetailVideoFragment recipeDetailVideoFragment = (RecipeDetailVideoFragment) getFragmentManager().findFragmentById(R.id.description_fragment);
                     ids = versionNameIndex;
                     SharedPreferences prefs = getSharedPreferences("BAKINGAPP", Context.MODE_PRIVATE);
                     prefs.edit().putInt("POSITION", ids).apply();
                     if (!getResources().getBoolean(R.bool.isTablet)) {
-                        Intent intent1 = new Intent(RecipeDetailSPActivity.this, RecipeVideoActivity.class);
+                        Intent intent1 = new Intent(RecipeDetailFragActivity.this, RecipeDetailVideoActivity.class);
                         intent1.putExtra("ARRAY",stepList);
                         intent1.putExtra("POSISIS",versionNameIndex);
-                        Log.d("HASIL","PINDAH");
                         startActivity(intent1);
+                    }else {
+                        if (recipeDetailVideoFragment != null) {
+                            recipeDetailVideoFragment.setDescription(versionNameIndex);
+                        } else {
+                            RecipeDetailVideoFragment newDesriptionFragment = new RecipeDetailVideoFragment();
+                            Bundle args = new Bundle();
+                            args.putInt(KEY_POSITION, versionNameIndex);
+                            args.putParcelableArrayList(ARRAY_STEP, stepList);
+                            newDesriptionFragment.setArguments(args);
+                            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                            fragmentTransaction.replace(R.id.fragment_container, newDesriptionFragment, FRAGMENT);
+                            fragmentTransaction.commit();
+                        }
                     }
                 }
             }

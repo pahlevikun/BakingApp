@@ -1,6 +1,5 @@
 package com.udacity.bakingapp;
 
-import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,16 +7,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.widget.TextView;
 
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
-import com.google.gson.Gson;
+import com.udacity.bakingapp.adapter.FragmentAdapter;
 import com.udacity.bakingapp.pojo.Ingredient;
 import com.udacity.bakingapp.pojo.Recipe;
 import com.udacity.bakingapp.pojo.Step;
@@ -29,14 +30,9 @@ import java.util.ArrayList;
  * Created by farhan on 9/3/17.
  */
 
-public class RecipeDetailActivity extends AppCompatActivity /*implements OnRecipeSelect */{
+public class RecipeDetailActActivity extends AppCompatActivity {
 
     private int ids=0, id;
-    public StringBuffer temp = new StringBuffer();
-
-    public ArrayList<Ingredient> ingredientList = new ArrayList<Ingredient>();
-    private ArrayList<Recipe> recipeList = new ArrayList<Recipe>();
-    public ArrayList<Step> stepList = new ArrayList<Step>();
 
     private SharedPreferences shared;
     private LinearLayout linearLayout;
@@ -45,20 +41,32 @@ public class RecipeDetailActivity extends AppCompatActivity /*implements OnRecip
     final static String ARRAY_STEP = "STEPLIST";
     final static String FRAGMENT = "FRAGMENT";
 
-    private RecipeDetailFragment recipeDetailFragment = new RecipeDetailFragment();
+    private RecipeDetailVideoFragment recipeDetailVideoFragment = new RecipeDetailVideoFragment();
 
+    private ArrayList<Step> stepList = new ArrayList<Step>();
+    private ArrayList<Ingredient> ingredientList = new ArrayList<Ingredient>();
+    private ArrayList<Recipe> recipeList = new ArrayList<Recipe>();
+    private String[] versionName;
+    private RecyclerView recyclerView;
+    private TextView textView;
+    private FragmentAdapter adapter;
+    private LinearLayoutManager layoutManager;
+    public StringBuffer temp = new StringBuffer();
     private BroadcastReceiver broadcastReceiver;
+    private NestedScrollView scrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recipe_detail);
+        setContentView(R.layout.activity_recipe_detail_sp);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        textView = (TextView) findViewById(R.id.text);
+        scrollView = (NestedScrollView) findViewById(R.id.scrollView);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -70,6 +78,7 @@ public class RecipeDetailActivity extends AppCompatActivity /*implements OnRecip
                 finish();
             }
         }
+
         stepList = recipeList.get(id).getSteps();
         ingredientList = recipeList.get(id).getIngredients();
 
@@ -84,27 +93,25 @@ public class RecipeDetailActivity extends AppCompatActivity /*implements OnRecip
             editor.apply();
             Log.d("HASILSHARED",""+temp);
 
-            Intent updateWidget = new Intent(RecipeDetailActivity.this, WidgetProvider.class);
+            Intent updateWidget = new Intent(RecipeDetailActActivity.this, WidgetProvider.class);
             updateWidget.setAction("update_widget");
-            PendingIntent pending = PendingIntent.getBroadcast(RecipeDetailActivity.this, 0, updateWidget, PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent pending = PendingIntent.getBroadcast(RecipeDetailActActivity.this, 0, updateWidget, PendingIntent.FLAG_CANCEL_CURRENT);
             pending.send();
         }catch (Exception e){
             Log.d("EXCEPTION",""+e);
         }
 
-        if (findViewById(R.id.fragment_container) != null) {
-//            if (savedInstanceState != null) {
-//                recipeDetailFragment.setDescription(ids);
-//            } else {
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList(RecipeDetailFragment.ARRAY_STEP, stepList);
-                RecipeListFragment recipeListFragment = new RecipeListFragment();
-                recipeListFragment.setArguments(bundle);
-                getFragmentManager().beginTransaction()
-                        .add(R.id.fragment_container, recipeListFragment)
-                        .commit();
-//            }
+        for (int i = 0; i < ingredientList.size(); i++) {
+            temp.append((i + 1) + ". " + ingredientList.get(i).getIngredient()
+                    + "\t(" + ingredientList.get(i).getQuantity() + " " + ingredientList.get(i).getMeasure() + ")\n");
         }
+        textView.setText(temp + "");
+        FragmentAdapter adapter1 = new FragmentAdapter(RecipeDetailActActivity.this, stepList, temp + "");
+        LinearLayoutManager layoutManager1 = new LinearLayoutManager(RecipeDetailActActivity.this, LinearLayoutManager.VERTICAL, false);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(layoutManager1);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(adapter1);
 
         destroyActivity();
     }
@@ -118,6 +125,11 @@ public class RecipeDetailActivity extends AppCompatActivity /*implements OnRecip
 
         SharedPreferences prefs = getSharedPreferences("BAKINGAPP", Context.MODE_PRIVATE);
         prefs.edit().putInt("POSITION", ids).apply();
+
+
+        outState.putIntArray("ARTICLE_SCROLL_POSITION", new int[]{scrollView.getScrollX(), scrollView.getScrollY()});
+        outState.putParcelableArrayList("ARRAYSTEP",stepList);
+        outState.putParcelableArrayList("ARRAYINGREDIENTS",ingredientList);
     }
 
     @Override
@@ -130,19 +142,15 @@ public class RecipeDetailActivity extends AppCompatActivity /*implements OnRecip
 
             ids = savedInstanceState.getInt(KEY_POSITION,0);
 
-            RecipeDetailFragment recipeDetailFragment = (RecipeDetailFragment) getFragmentManager().findFragmentById(R.id.description_fragment);
-            if (recipeDetailFragment != null ) {
-                recipeDetailFragment.setDescription(ids);
-            } else {
-                RecipeDetailFragment newDesriptionFragment = new RecipeDetailFragment();
-                Bundle args = new Bundle();
-                args.putInt(KEY_POSITION, ids);
-                args.putParcelableArrayList(ARRAY_STEP, stepList);
-                newDesriptionFragment.setArguments(args);
-                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, newDesriptionFragment,FRAGMENT);
-                fragmentTransaction.commit();
-            }
+            final int[] position = savedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
+            stepList = savedInstanceState.getParcelableArrayList("ARRAYSTEP");
+            stepList = savedInstanceState.getParcelableArrayList("ARRAYINGREDIENTS");
+            if (position != null)
+                scrollView.post(new Runnable() {
+                    public void run() {
+                        scrollView.scrollTo(position[0], position[1]);
+                    }
+                });
 
         }
     }
@@ -155,29 +163,15 @@ public class RecipeDetailActivity extends AppCompatActivity /*implements OnRecip
                 String action = intent.getAction();
                 if (action.equals(getString(R.string.receiverBakingApp))) {
                     int versionNameIndex = intent.getExtras().getInt(getString(R.string.versionNameIndex));
-
-                    RecipeDetailFragment recipeDetailFragment = (RecipeDetailFragment) getFragmentManager().findFragmentById(R.id.description_fragment);
                     ids = versionNameIndex;
                     SharedPreferences prefs = getSharedPreferences("BAKINGAPP", Context.MODE_PRIVATE);
                     prefs.edit().putInt("POSITION", ids).apply();
                     if (!getResources().getBoolean(R.bool.isTablet)) {
-                        Intent intent1 = new Intent(RecipeDetailActivity.this, RecipeVideoActivity.class);
+                        Intent intent1 = new Intent(RecipeDetailActActivity.this, RecipeDetailVideoActivity.class);
                         intent1.putExtra("ARRAY",stepList);
                         intent1.putExtra("POSISIS",versionNameIndex);
+                        Log.d("HASIL","PINDAH");
                         startActivity(intent1);
-                    }else {
-                        if (recipeDetailFragment != null) {
-                            recipeDetailFragment.setDescription(versionNameIndex);
-                        } else {
-                            RecipeDetailFragment newDesriptionFragment = new RecipeDetailFragment();
-                            Bundle args = new Bundle();
-                            args.putInt(KEY_POSITION, versionNameIndex);
-                            args.putParcelableArrayList(ARRAY_STEP, stepList);
-                            newDesriptionFragment.setArguments(args);
-                            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                            fragmentTransaction.replace(R.id.fragment_container, newDesriptionFragment, FRAGMENT);
-                            fragmentTransaction.commit();
-                        }
                     }
                 }
             }

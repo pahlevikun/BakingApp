@@ -36,7 +36,7 @@
 
         <fragment
             android:id="@+id/description_fragment"
-            android:name="com.udacity.bakingapp.RecipeDetailFragment"
+            android:name="com.udacity.bakingapp.RecipeDetailVideoFragment"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2" />
