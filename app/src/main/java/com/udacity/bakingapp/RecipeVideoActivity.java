@@ -75,9 +75,6 @@ public class RecipeVideoActivity extends AppCompatActivity {
             videoPost = savedInstanceState.getLong(SELECTED_POSITION, 0);
             Log.d("POSISI","AMBIL BUAT "+videoPost);
         }
-        if (player==null){
-            initializePlayer(Uri.parse(uri));
-        }
 
     }
 
