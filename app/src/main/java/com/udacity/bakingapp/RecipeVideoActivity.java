@@ -71,6 +71,16 @@ public class RecipeVideoActivity extends AppCompatActivity {
         Log.d("HASIL", stepList.size() + " " + posisiSekarang);
         setDescription(posisiSekarang);
 
+        if (savedInstanceState != null) {
+            videoPost = savedInstanceState.getLong(SELECTED_POSITION, 0);
+            Log.d("POSISI","AMBIL BUAT "+videoPost);
+        }
+        if (player==null){
+            initializePlayer(Uri.parse(uri));
+        }else if (player!=null){
+            player.seekTo(videoPost);
+        }
+
     }
 
     public void setDescription(int descriptionIndex) {
@@ -102,33 +112,36 @@ public class RecipeVideoActivity extends AppCompatActivity {
         }
 
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if ((Util.SDK_INT <= 23 || player == null)) {
-            initializePlayer(Uri.parse(uri));
-            Log.d("HASIL", "exoplayer onResume");
-        }else{
-            player.seekTo(videoPost);
-            Log.d("POSISI", "RESUME " + videoPost);
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (Util.SDK_INT <= 23) {
-            releasePlayer();
-        }
-    }
+//
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        if ((Util.SDK_INT <= 23 || player == null)) {
+//            initializePlayer(Uri.parse(uri));
+//            player.seekTo(videoPost);
+//            Log.d("HASIL", "exoplayer onResume");
+//        }
+//        if (player != null){
+//            player.seekTo(videoPost);
+//            Log.d("POSISI", "RESUME " + videoPost);
+//        }
+//    }
+//
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        if (Util.SDK_INT <= 23) {
+//            releasePlayer();
+//        }
+//    }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (Util.SDK_INT > 23) {
+        //if (Util.SDK_INT > 23) {
             releasePlayer();
-        }
+        //}
+
     }
 
     @Override
@@ -140,15 +153,14 @@ public class RecipeVideoActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            if (savedInstanceState != null) {
-                videoPost = savedInstanceState.getLong(SELECTED_POSITION, 0);
-            }
-        }
-    }
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        if (savedInstanceState != null) {
+//            videoPost = savedInstanceState.getLong(SELECTED_POSITION, 0);
+//            Log.d("POSISI","AMBIL "+videoPost);
+//        }
+//    }
 
 //    private void initializePlayer() {
 //        try {
