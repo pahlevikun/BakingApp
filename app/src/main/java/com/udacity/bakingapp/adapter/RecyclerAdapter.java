@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.udacity.bakingapp.R;
 import com.udacity.bakingapp.RecipeDetailActivity;
+import com.udacity.bakingapp.RecipeDetailSPActivity;
 import com.udacity.bakingapp.pojo.Ingredient;
 import com.udacity.bakingapp.pojo.Recipe;
 import com.udacity.bakingapp.pojo.Step;
@@ -51,22 +52,42 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         viewHolder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(context, RecipeDetailActivity.class);
-                intent.putExtra("title",movieData.get(i).getName());
-                intent.putParcelableArrayListExtra("parcel",movieData);
-                intent.putExtra("id",i);
+                if (context.getResources().getBoolean(R.bool.isTablet)){
+                    Intent intent = new Intent(context, RecipeDetailActivity.class);
+                    intent.putExtra("title",movieData.get(i).getName());
+                    intent.putParcelableArrayListExtra("parcel",movieData);
+                    intent.putExtra("id",i);
 
-                SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-                SharedPreferences.Editor editor = sharedPrefs.edit();
-                Gson gson = new Gson();
-                String json1 = gson.toJson(steps);
-                String json2 = gson.toJson(ingredients);
-                editor.putString("JSON1", json1);
-                editor.putString("JSON2", json2);
-                editor.commit();
+                    SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+                    SharedPreferences.Editor editor = sharedPrefs.edit();
+                    Gson gson = new Gson();
+                    String json1 = gson.toJson(steps);
+                    String json2 = gson.toJson(ingredients);
+                    editor.putString("JSON1", json1);
+                    editor.putString("JSON2", json2);
+                    editor.commit();
 
-                Log.d("HASIL",""+json1);
-                context.startActivity(intent);
+                    Log.d("HASIL",""+json1);
+                    context.startActivity(intent);
+                }else{
+                    Intent intent = new Intent(context, RecipeDetailSPActivity.class);
+                    intent.putExtra("title",movieData.get(i).getName());
+                    intent.putParcelableArrayListExtra("parcel",movieData);
+                    intent.putExtra("id",i);
+
+                    SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+                    SharedPreferences.Editor editor = sharedPrefs.edit();
+                    Gson gson = new Gson();
+                    String json1 = gson.toJson(steps);
+                    String json2 = gson.toJson(ingredients);
+                    editor.putString("JSON1", json1);
+                    editor.putString("JSON2", json2);
+                    editor.commit();
+
+                    Log.d("HASIL",""+json1);
+                    context.startActivity(intent);
+                }
+
             }
         });
 

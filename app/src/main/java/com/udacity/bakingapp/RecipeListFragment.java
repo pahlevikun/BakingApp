@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -37,7 +38,7 @@ public class RecipeListFragment extends Fragment {
     private LinearLayoutManager layoutManager;
     public StringBuffer temp = new StringBuffer();
     private BroadcastReceiver broadcastReceiver;
-    private ScrollView scrollView;
+    private NestedScrollView scrollView;
 
     public RecipeListFragment() {
 
@@ -46,11 +47,28 @@ public class RecipeListFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            final int[] position = savedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
+            stepList = savedInstanceState.getParcelableArrayList("ARRAYSTEP");
+            stepList = savedInstanceState.getParcelableArrayList("ARRAYINGREDIENTS");
+            if (position != null)
+                scrollView.post(new Runnable() {
+                    public void run() {
+                        scrollView.scrollTo(position[0], position[1]);
+                    }
+                });
+        }else {
+            stepList = ((RecipeDetailActivity) getActivity()).stepList;
+            ingredientList = ((RecipeDetailActivity) getActivity()).ingredientList;
+        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putIntArray("ARTICLE_SCROLL_POSITION", new int[]{scrollView.getScrollX(), scrollView.getScrollY()});
+        outState.putParcelableArrayList("ARRAYSTEP",stepList);
+        outState.putParcelableArrayList("ARRAYINGREDIENTS",ingredientList);
     }
 
     @Override
@@ -59,18 +77,26 @@ public class RecipeListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         textView = (TextView) view.findViewById(R.id.text);
+        scrollView = (NestedScrollView) view.findViewById(R.id.scrollView);
+        if (savedInstanceState!=null){
+            stepList = savedInstanceState.getParcelableArrayList("ARRAYSTEP");
+            stepList = savedInstanceState.getParcelableArrayList("ARRAYINGREDIENTS");
+        }else{
+            stepList = ((RecipeDetailActivity) getActivity()).stepList;
+            ingredientList = ((RecipeDetailActivity) getActivity()).ingredientList;
+        }
         new Handler().postDelayed(new Thread() {
             @Override
             public void run() {
-                stepList = ((RecipeDetailActivity)getActivity()).stepList;
-                ingredientList = ((RecipeDetailActivity)getActivity()).ingredientList;
+//                stepList = ((RecipeDetailActivity) getActivity()).stepList;
+//                ingredientList = ((RecipeDetailActivity) getActivity()).ingredientList;
 
                 for (int i = 0; i < ingredientList.size(); i++) {
                     temp.append((i + 1) + ". " + ingredientList.get(i).getIngredient()
                             + "\t(" + ingredientList.get(i).getQuantity() + " " + ingredientList.get(i).getMeasure() + ")\n");
                 }
-                textView.setText(temp+"");
-                FragmentAdapter adapter1 = new FragmentAdapter(getActivity(),stepList,temp+"");
+                textView.setText(temp + "");
+                FragmentAdapter adapter1 = new FragmentAdapter(getActivity(), stepList, temp + "");
                 LinearLayoutManager layoutManager1 = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setLayoutManager(layoutManager1);
@@ -97,7 +123,7 @@ public class RecipeListFragment extends Fragment {
                         @Override
                         public void run() {
                             recyclerView.scrollToPosition(versionNameIndex);
-                            Log.d("POSITION","dest "+versionNameIndex);
+                            Log.d("POSITION", "dest " + versionNameIndex);
                         }
                     }, 100);
                 }

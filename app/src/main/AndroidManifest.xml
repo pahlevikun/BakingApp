@@ -39,7 +39,8 @@
                 android:resource="@xml/widget_info" />
         </receiver>
 
-        <activity android:name=".RecipeVideoActivity"></activity>
+        <activity android:name=".RecipeVideoActivity"/>
+        <activity android:name=".RecipeDetailSPActivity"/>
     </application>
 
 </manifest>
