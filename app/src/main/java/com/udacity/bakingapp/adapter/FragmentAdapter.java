@@ -38,6 +38,7 @@ public class FragmentAdapter extends RecyclerView.Adapter<FragmentAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(FragmentAdapter.ViewHolder viewHolder, final int i) {
+            viewHolder.imageView.setVisibility(View.GONE);
             viewHolder.textView1.setText(movieData.get(i).getId() +". "+ movieData.get(i).getShortDescription());
             viewHolder.cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
