@@ -37,8 +37,9 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
     final static String KEY_POSITION = "POSITION";
     final static String SELECTED_POSITION = "SELECTED_POSITION";
     final static String ARRAY_STEP = "STEPLIST";
+    final static String PLAY_STATE = "PLAYSTEP";
     int posisiSekarang = -1;
-    long videoPost;
+    boolean isPlayWhenReady = false;
 
     private ArrayList<Step> stepList = new ArrayList<Step>();
     private ImageView imageView;
@@ -57,20 +58,31 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
             positionExo = savedInstanceState.getLong(SELECTED_POSITION, 0);
             posisiSekarang = savedInstanceState.getInt(KEY_POSITION);
             stepList = savedInstanceState.getParcelableArrayList(ARRAY_STEP);
-            Log.d("POSISI","AMBIL "+positionExo);
-            releasePlayer();
+            isPlayWhenReady = savedInstanceState.getBoolean(PLAY_STATE);
+
+            Log.d("POSISI","AMBIL "+positionExo+" "+isPlayWhenReady);
+            //releasePlayer();
             setDescription(posisiSekarang);
         }
     }
 
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        positionExo = player.getCurrentPosition();
+        if (player!=null){
+            positionExo = player.getCurrentPosition();
+            isPlayWhenReady = player.getPlayWhenReady();
+
+            Log.d("POSISI","SIMPAN NOT NULL "+positionExo+" "+isPlayWhenReady);
+        }else{
+            positionExo = 0;
+            isPlayWhenReady = false;
+        }
+        outState.putBoolean(PLAY_STATE, isPlayWhenReady);
         outState.putLong(SELECTED_POSITION, positionExo);
         outState.putInt(KEY_POSITION, posisiSekarang);
         outState.putParcelableArrayList(ARRAY_STEP, stepList);
-        releasePlayer();
-        Log.d("POSISI", "SIMPAN " + positionExo);
+        //releasePlayer();
+        Log.d("POSISI", "SIMPAN " + positionExo+" "+isPlayWhenReady);
     }
 
     @Override
@@ -95,6 +107,7 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
         setDescription(posisiSekarang);
 
     }
+
 
     public void setDescription(int descriptionIndex) {
         try{
@@ -129,34 +142,24 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
             releasePlayer();
             initializePlayer();
             player.seekTo(positionExo);
+            player.setPlayWhenReady(isPlayWhenReady);
             Log.d("POSISI","SET DESC 2 POSISI "+positionExo);
         }else{
             releasePlayer();
             initializePlayer();
             player.seekTo(positionExo);
+            player.setPlayWhenReady(isPlayWhenReady);
             Log.d("POSISI","SET DESC 3 POSISI "+positionExo);
         }
     }
-
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        if ((Util.SDK_INT <= 23 || player == null)) {
-//            initializePlayer(Uri.parse(uri));
-//            player.seekTo(videoPost);
-//            Log.d("HASIL", "exoplayer onResume");
-//        }
-//        if (player != null){
-//            player.seekTo(videoPost);
-//            Log.d("POSISI", "RESUME " + videoPost);
-//        }
-//    }
 
     @Override
     public void onPause() {
         super.onPause();
         if (Util.SDK_INT <= 23) {
             positionExo = player.getCurrentPosition();
+            isPlayWhenReady = player.getPlayWhenReady();
+            Log.d("POSISI","onPause "+positionExo+" "+isPlayWhenReady);
             releasePlayer();
         }
     }
@@ -165,18 +168,12 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
         if (Util.SDK_INT > 23) {
+            Log.d("POSISI","onStop "+positionExo+" "+isPlayWhenReady);
+            positionExo = player.getCurrentPosition();
+            isPlayWhenReady = player.getPlayWhenReady();
             releasePlayer();
         }
     }
-
-//    @Override
-//    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-//        super.onSaveInstanceState(outState, outPersistentState);
-//        positionExo = player.getCurrentPosition();
-//        outState.putLong(SELECTED_POSITION, positionExo);
-//        Log.d("POSISI", "SIMPAN " + positionExo);
-//
-//    }
 
     private void initializePlayer() {
         try {

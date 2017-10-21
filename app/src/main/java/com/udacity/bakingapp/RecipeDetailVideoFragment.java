@@ -117,7 +117,6 @@ public class RecipeDetailVideoFragment extends Fragment {
                     imageView.setVisibility(View.GONE);
                     simpleExoPlayerView.setVisibility(View.VISIBLE);
                     uri = stepList.get(descriptionIndex).getVideoURL();
-                    //initializePlayer();
                 } else {
                     if (stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")){
                         uri = stepList.get(descriptionIndex).getThumbnailURL();
@@ -127,18 +126,6 @@ public class RecipeDetailVideoFragment extends Fragment {
                         imageView.setVisibility(View.VISIBLE);
                         simpleExoPlayerView.setVisibility(View.GONE);
                     }
-//                if (isVideoFile(stepList.get(descriptionIndex).getThumbnailURL()) && !stepList.get(descriptionIndex).getThumbnailURL().isEmpty()) {
-//                    uri = stepList.get(descriptionIndex).getThumbnailURL();
-//                    imageView.setVisibility(View.GONE);
-//                    simpleExoPlayerView.setVisibility(View.VISIBLE);
-//                    //initializePlayer();
-//                } else {
-//                    imageView.setVisibility(View.VISIBLE);
-//                    simpleExoPlayerView.setVisibility(View.GONE);
-//                    if (!stepList.get(descriptionIndex).getThumbnailURL().isEmpty()) {
-//                        Picasso.with(getActivity()).load(stepList.get(descriptionIndex).getThumbnailURL()).into(imageView);
-//                    }
-//                }
                 }
             }
         }catch (Exception e){
@@ -153,25 +140,6 @@ public class RecipeDetailVideoFragment extends Fragment {
             initializePlayer();
         }
     }
-
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        new Handler().postDelayed(new Thread() {
-//            @Override
-//            public void run() {
-//                if ((Util.SDK_INT <= 23 || player == null)) {
-//                    initializePlayer();
-//                    Log.d("HASIL", "exoplayer onResume");
-//
-//                }
-//                if (player!=null){
-//                    player.seekTo(positionExo);
-//                }
-//            }
-//        }, 100);
-//
-//    }
 
     @Override
     public void onPause() {
@@ -223,11 +191,6 @@ public class RecipeDetailVideoFragment extends Fragment {
             player.release();
             player = null;
         }
-    }
-
-    public static boolean isVideoFile(String path) {
-        String mimeType = URLConnection.guessContentTypeFromName(path);
-        return mimeType != null && mimeType.startsWith("video");
     }
 
 }

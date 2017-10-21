@@ -89,9 +89,6 @@ public class RecipeDetailFragActivity extends AppCompatActivity /*implements OnR
         }
 
         if (findViewById(R.id.fragment_container) != null) {
-//            if (savedInstanceState != null) {
-//                recipeDetailFragment.setDescription(ids);
-//            } else {
                 Bundle bundle = new Bundle();
                 bundle.putParcelableArrayList(RecipeDetailVideoFragment.ARRAY_STEP, stepList);
                 RecipeListFragment recipeListFragment = new RecipeListFragment();
@@ -99,9 +96,7 @@ public class RecipeDetailFragActivity extends AppCompatActivity /*implements OnR
                 getFragmentManager().beginTransaction()
                         .add(R.id.fragment_container, recipeListFragment)
                         .commit();
-//            }
         }
-
         destroyActivity();
     }
 
