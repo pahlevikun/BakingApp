@@ -61,7 +61,7 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
             stepList = savedInstanceState.getParcelableArrayList(ARRAY_STEP);
             isPlayWhenReady = savedInstanceState.getBoolean(PLAY_STATE);
 
-            Log.d("POSISI","AMBIL "+positionExo+" "+isPlayWhenReady);
+            Log.d("POSISI", "AMBIL " + positionExo + " " + isPlayWhenReady);
             //releasePlayer();
             setDescription(posisiSekarang);
         }
@@ -69,12 +69,12 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
 
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (player!=null){
+        if (player != null) {
             positionExo = player.getCurrentPosition();
             isPlayWhenReady = player.getPlayWhenReady();
 
-            Log.d("POSISI","SIMPAN NOT NULL "+positionExo+" "+isPlayWhenReady);
-        }else{
+            Log.d("POSISI", "SIMPAN NOT NULL " + positionExo + " " + isPlayWhenReady);
+        } else {
             positionExo = 0;
             isPlayWhenReady = false;
         }
@@ -83,7 +83,7 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
         outState.putInt(KEY_POSITION, posisiSekarang);
         outState.putParcelableArrayList(ARRAY_STEP, stepList);
         //releasePlayer();
-        Log.d("POSISI", "SIMPAN " + positionExo+" "+isPlayWhenReady);
+        Log.d("POSISI", "SIMPAN " + positionExo + " " + isPlayWhenReady);
     }
 
     @Override
@@ -111,11 +111,11 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
 
 
     public void setDescription(int descriptionIndex) {
-        try{
+        try {
             Log.d("HASILFRAG", "12 Set Description");
             posisiSekarang = descriptionIndex;
-            Log.d("POSISI","SET DESC 1 POSISI "+positionExo);
-            Log.d("HASIL","keempat "+stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")+" "+stepList.get(descriptionIndex).getVideoURL());
+            Log.d("POSISI", "SET DESC 1 POSISI " + positionExo);
+            Log.d("HASIL", "keempat " + stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4") + " " + stepList.get(descriptionIndex).getVideoURL());
             if (descriptionIndex > -1) {
                 textView.setText(stepList.get(descriptionIndex).getDescription());
 
@@ -125,34 +125,34 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
                     uri = stepList.get(descriptionIndex).getVideoURL();
                     //initializePlayer();
                 } else {
-                    if (stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")){
+                    if (stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")) {
                         uri = stepList.get(descriptionIndex).getThumbnailURL();
                         imageView.setVisibility(View.GONE);
                         simpleExoPlayerView.setVisibility(View.VISIBLE);
-                    }else if (!stepList.get(descriptionIndex).getThumbnailURL().isEmpty()){
+                    } else if (!stepList.get(descriptionIndex).getThumbnailURL().isEmpty()) {
                         Picasso.with(this).load(stepList.get(descriptionIndex).getThumbnailURL()).into(imageView);
-                    }else{
+                    } else {
                         imageView.setVisibility(View.VISIBLE);
                         simpleExoPlayerView.setVisibility(View.GONE);
                     }
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
-        Log.d("HASIL","URI "+uri);
-        if (player!=null){
+        Log.d("HASIL", "URI " + uri);
+        if (player != null) {
             releasePlayer();
             initializePlayer();
             player.seekTo(positionExo);
             player.setPlayWhenReady(isPlayWhenReady);
-            Log.d("POSISI","SET DESC 2 POSISI "+positionExo);
-        }else{
+            Log.d("POSISI", "SET DESC 2 POSISI " + positionExo);
+        } else {
             releasePlayer();
             initializePlayer();
             player.seekTo(positionExo);
             player.setPlayWhenReady(isPlayWhenReady);
-            Log.d("POSISI","SET DESC 3 POSISI "+positionExo);
+            Log.d("POSISI", "SET DESC 3 POSISI " + positionExo);
         }
     }
 
@@ -161,9 +161,7 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
         super.onResume();
         if ((Util.SDK_INT <= 23 || player == null)) {
             initializePlayer();
-            player.seekTo(positionExo);
-            player.setPlayWhenReady(isPlayWhenReady);
-            Log.d("POSISI","onResume");
+            Log.d("POSISI", "onResume");
         }
     }
 
@@ -171,14 +169,14 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         if (Util.SDK_INT <= 23) {
-            if (player!=null){
+            if (player != null) {
                 positionExo = player.getCurrentPosition();
                 isPlayWhenReady = player.getPlayWhenReady();
-            }else{
+            } else {
                 positionExo = 0;
                 isPlayWhenReady = false;
             }
-            Log.d("POSISI","onPause "+positionExo+" "+isPlayWhenReady);
+            Log.d("POSISI", "onPause " + positionExo + " " + isPlayWhenReady);
             releasePlayer();
         }
     }
@@ -187,11 +185,11 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
         if (Util.SDK_INT > 23) {
-            Log.d("POSISI","onStop "+positionExo+" "+isPlayWhenReady);
-            if (player!=null){
+            Log.d("POSISI", "onStop " + positionExo + " " + isPlayWhenReady);
+            if (player != null) {
                 positionExo = player.getCurrentPosition();
                 isPlayWhenReady = player.getPlayWhenReady();
-            }else{
+            } else {
                 positionExo = 0;
                 isPlayWhenReady = false;
             }
@@ -234,6 +232,7 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
             player = null;
         }
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
