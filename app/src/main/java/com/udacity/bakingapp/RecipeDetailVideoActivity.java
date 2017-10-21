@@ -28,6 +28,7 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
 import com.udacity.bakingapp.pojo.Step;
 
 import java.util.ArrayList;
@@ -38,8 +39,9 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
     final static String SELECTED_POSITION = "SELECTED_POSITION";
     final static String ARRAY_STEP = "STEPLIST";
     final static String PLAY_STATE = "PLAYSTEP";
-    int posisiSekarang = -1;
-    boolean isPlayWhenReady = false;
+    private int posisiSekarang = -1;
+    private boolean isPlayWhenReady = false;
+    private long positionExo = 0;
 
     private ArrayList<Step> stepList = new ArrayList<Step>();
     private ImageView imageView;
@@ -49,7 +51,6 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
     private BandwidthMeter bandwidthMeter;
     private Handler handler;
     private String uri;
-    private long positionExo;
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -128,6 +129,8 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
                         uri = stepList.get(descriptionIndex).getThumbnailURL();
                         imageView.setVisibility(View.GONE);
                         simpleExoPlayerView.setVisibility(View.VISIBLE);
+                    }else if (!stepList.get(descriptionIndex).getThumbnailURL().isEmpty()){
+                        Picasso.with(this).load(stepList.get(descriptionIndex).getThumbnailURL()).into(imageView);
                     }else{
                         imageView.setVisibility(View.VISIBLE);
                         simpleExoPlayerView.setVisibility(View.GONE);
@@ -154,11 +157,27 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if ((Util.SDK_INT <= 23 || player == null)) {
+            initializePlayer();
+            player.seekTo(positionExo);
+            player.setPlayWhenReady(isPlayWhenReady);
+            Log.d("POSISI","onResume");
+        }
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         if (Util.SDK_INT <= 23) {
-            positionExo = player.getCurrentPosition();
-            isPlayWhenReady = player.getPlayWhenReady();
+            if (player!=null){
+                positionExo = player.getCurrentPosition();
+                isPlayWhenReady = player.getPlayWhenReady();
+            }else{
+                positionExo = 0;
+                isPlayWhenReady = false;
+            }
             Log.d("POSISI","onPause "+positionExo+" "+isPlayWhenReady);
             releasePlayer();
         }
@@ -169,8 +188,13 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
         super.onStop();
         if (Util.SDK_INT > 23) {
             Log.d("POSISI","onStop "+positionExo+" "+isPlayWhenReady);
-            positionExo = player.getCurrentPosition();
-            isPlayWhenReady = player.getPlayWhenReady();
+            if (player!=null){
+                positionExo = player.getCurrentPosition();
+                isPlayWhenReady = player.getPlayWhenReady();
+            }else{
+                positionExo = 0;
+                isPlayWhenReady = false;
+            }
             releasePlayer();
         }
     }
@@ -188,13 +212,14 @@ public class RecipeDetailVideoActivity extends AppCompatActivity {
                 simpleExoPlayerView.setPlayer(player);
 
                 MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(uri), new DefaultDataSourceFactory(RecipeDetailVideoActivity.this, userAgent), new DefaultExtractorsFactory(), null, null);
+
+                player.seekTo(positionExo);
+                player.setPlayWhenReady(isPlayWhenReady);
                 player.prepare(mediaSource);
                 player.setPlayWhenReady(true);
                 if (getResources().getBoolean(R.bool.isTablet)) {
                     simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
                 }
-            }else{
-                player.seekTo(positionExo);
             }
         } catch (Exception e) {
             imageView.setVisibility(View.VISIBLE);
