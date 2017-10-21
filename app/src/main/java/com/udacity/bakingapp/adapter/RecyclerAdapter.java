@@ -53,7 +53,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         if (!movieData.get(i).getImage().isEmpty()){
             Picasso.with(context).load(movieData.get(i).getImage()).into(viewHolder.imageView);
         }else{
-            Picasso.with(context).load(R.drawable.ic_no_video).into(viewHolder.imageView);
+            viewHolder.imageView.setImageResource(R.drawable.ic_no_video);
         }
         viewHolder.textView1.setText(movieData.get(i).getName());
         viewHolder.cardView.setOnClickListener(new View.OnClickListener() {
