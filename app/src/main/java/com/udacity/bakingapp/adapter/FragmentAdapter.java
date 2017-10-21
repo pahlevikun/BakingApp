@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.udacity.bakingapp.R;
 import com.udacity.bakingapp.pojo.Step;
 
@@ -38,7 +39,15 @@ public class FragmentAdapter extends RecyclerView.Adapter<FragmentAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(FragmentAdapter.ViewHolder viewHolder, final int i) {
-            viewHolder.imageView.setVisibility(View.GONE);
+        if (!movieData.get(i).getThumbnailURL().isEmpty()){
+            if (movieData.get(i).getThumbnailURL().endsWith(".mp4")){
+                viewHolder.imageView.setImageResource(R.drawable.ic_no_video);
+            }else{
+                Picasso.with(context).load(movieData.get(i).getThumbnailURL()).into(viewHolder.imageView);
+            }
+        }else{
+            viewHolder.imageView.setImageResource(R.drawable.ic_no_video);
+        }
             viewHolder.textView1.setText(movieData.get(i).getId() +". "+ movieData.get(i).getShortDescription());
             viewHolder.cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
