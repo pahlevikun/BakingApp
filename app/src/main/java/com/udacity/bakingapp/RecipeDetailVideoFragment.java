@@ -27,6 +27,7 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
 import com.udacity.bakingapp.pojo.Step;
 
 import java.net.URLConnection;
@@ -37,6 +38,7 @@ public class RecipeDetailVideoFragment extends Fragment {
     final static String KEY_POSITION = "POSITION";
     final static String SELECTED_POSITION = "SELECTED_POSITION";
     final static String ARRAY_STEP = "STEPLIST";
+    final static String PLAY_STATE = "PLAYSTEP";
     int posisiSekarang = -1;
 
     private ArrayList<Step> stepList = new ArrayList<Step>();
@@ -46,7 +48,8 @@ public class RecipeDetailVideoFragment extends Fragment {
     private SimpleExoPlayer player;
     private BandwidthMeter bandwidthMeter;
     private Handler handler;
-    private long positionExo;
+    private boolean isPlayWhenReady = false;
+    private long positionExo = 0;
     private String uri;
 
 
@@ -58,11 +61,14 @@ public class RecipeDetailVideoFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Log.d("HASILFRAG", "8 Activity Create");
-        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_POSITION)) {
+        if (savedInstanceState != null) {
+            positionExo = savedInstanceState.getLong(SELECTED_POSITION, 0);
             posisiSekarang = savedInstanceState.getInt(KEY_POSITION);
             stepList = savedInstanceState.getParcelableArrayList(ARRAY_STEP);
-            positionExo = savedInstanceState.getLong(SELECTED_POSITION,0);
-            releasePlayer();
+            isPlayWhenReady = savedInstanceState.getBoolean(PLAY_STATE);
+
+            Log.d("POSISI", "AMBIL " + positionExo + " " + isPlayWhenReady);
+            //releasePlayer();
             setDescription(posisiSekarang);
         } else {
             stepList = ((RecipeDetailFragActivity) getActivity()).stepList;
@@ -72,14 +78,19 @@ public class RecipeDetailVideoFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (player!=null){
+        if (player != null) {
             positionExo = player.getCurrentPosition();
+            isPlayWhenReady = player.getPlayWhenReady();
+
+            Log.d("POSISI", "SIMPAN NOT NULL " + positionExo + " " + isPlayWhenReady);
+        } else {
+            positionExo = 0;
+            isPlayWhenReady = false;
         }
-        Log.d("HASILFRAG", "13 Simpan ke bundle");
-        outState.putInt(KEY_POSITION, posisiSekarang);
+        outState.putBoolean(PLAY_STATE, isPlayWhenReady);
         outState.putLong(SELECTED_POSITION, positionExo);
+        outState.putInt(KEY_POSITION, posisiSekarang);
         outState.putParcelableArrayList(ARRAY_STEP, stepList);
-        releasePlayer();
     }
 
 
@@ -106,10 +117,11 @@ public class RecipeDetailVideoFragment extends Fragment {
     }
 
     public void setDescription(int descriptionIndex) {
-        try{
+        try {
             Log.d("HASILFRAG", "12 Set Description");
             posisiSekarang = descriptionIndex;
-            Log.d("HASIL","keempat "+stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")+" "+stepList.get(descriptionIndex).getVideoURL());
+            Log.d("POSISI", "SET DESC 1 POSISI " + positionExo);
+            Log.d("HASIL", "keempat " + stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4") + " " + stepList.get(descriptionIndex).getVideoURL());
             if (descriptionIndex > -1) {
                 textView.setText(stepList.get(descriptionIndex).getDescription());
 
@@ -117,27 +129,45 @@ public class RecipeDetailVideoFragment extends Fragment {
                     imageView.setVisibility(View.GONE);
                     simpleExoPlayerView.setVisibility(View.VISIBLE);
                     uri = stepList.get(descriptionIndex).getVideoURL();
+                    //initializePlayer();
                 } else {
-                    if (stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")){
+                    if (stepList.get(descriptionIndex).getThumbnailURL().endsWith(".mp4")) {
                         uri = stepList.get(descriptionIndex).getThumbnailURL();
                         imageView.setVisibility(View.GONE);
                         simpleExoPlayerView.setVisibility(View.VISIBLE);
-                    }else{
+                    } else if (!stepList.get(descriptionIndex).getThumbnailURL().isEmpty()) {
+                        Picasso.with(getActivity()).load(stepList.get(descriptionIndex).getThumbnailURL()).into(imageView);
+                    } else {
                         imageView.setVisibility(View.VISIBLE);
                         simpleExoPlayerView.setVisibility(View.GONE);
                     }
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
-        Log.d("HASIL","URI "+uri);
-        if (player!=null){
+        Log.d("HASIL", "URI " + uri);
+        if (player != null) {
             releasePlayer();
             initializePlayer();
             player.seekTo(positionExo);
-        }else{
+            player.setPlayWhenReady(isPlayWhenReady);
+            Log.d("POSISI", "SET DESC 2 POSISI " + positionExo);
+        } else {
+            releasePlayer();
             initializePlayer();
+            player.seekTo(positionExo);
+            player.setPlayWhenReady(isPlayWhenReady);
+            Log.d("POSISI", "SET DESC 3 POSISI " + positionExo);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if ((Util.SDK_INT <= 23 || player == null)) {
+            initializePlayer();
+            Log.d("POSISI", "onResume");
         }
     }
 
@@ -145,7 +175,14 @@ public class RecipeDetailVideoFragment extends Fragment {
     public void onPause() {
         super.onPause();
         if (Util.SDK_INT <= 23) {
-            positionExo = player.getCurrentPosition();
+            if (player != null) {
+                positionExo = player.getCurrentPosition();
+                isPlayWhenReady = player.getPlayWhenReady();
+            } else {
+                positionExo = 0;
+                isPlayWhenReady = false;
+            }
+            Log.d("POSISI", "onPause " + positionExo + " " + isPlayWhenReady);
             releasePlayer();
         }
     }
@@ -154,6 +191,14 @@ public class RecipeDetailVideoFragment extends Fragment {
     public void onStop() {
         super.onStop();
         if (Util.SDK_INT > 23) {
+            Log.d("POSISI", "onStop " + positionExo + " " + isPlayWhenReady);
+            if (player != null) {
+                positionExo = player.getCurrentPosition();
+                isPlayWhenReady = player.getPlayWhenReady();
+            } else {
+                positionExo = 0;
+                isPlayWhenReady = false;
+            }
             releasePlayer();
         }
     }
@@ -171,13 +216,14 @@ public class RecipeDetailVideoFragment extends Fragment {
                 simpleExoPlayerView.setPlayer(player);
 
                 MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(uri), new DefaultDataSourceFactory(getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
+
+                player.seekTo(positionExo);
+                player.setPlayWhenReady(isPlayWhenReady);
                 player.prepare(mediaSource);
                 player.setPlayWhenReady(true);
                 if (getResources().getBoolean(R.bool.isTablet)) {
                     simpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
                 }
-            }else{
-                player.seekTo(positionExo);
             }
         } catch (Exception e) {
             imageView.setVisibility(View.VISIBLE);

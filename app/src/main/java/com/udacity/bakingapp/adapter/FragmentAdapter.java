@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.udacity.bakingapp.R;
@@ -56,12 +57,14 @@ public class FragmentAdapter extends RecyclerView.Adapter<FragmentAdapter.ViewHo
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         private TextView textView1;
+        private ImageView imageView;
         private CardView cardView;
 
         public ViewHolder(View view) {
             super(view);
             textView1 = (TextView) view.findViewById(R.id.textViewTitle);
             cardView = (CardView) view.findViewById(R.id.cardViewMovie);
+            imageView = (ImageView) view.findViewById(R.id.imageView);
 
         }
     }

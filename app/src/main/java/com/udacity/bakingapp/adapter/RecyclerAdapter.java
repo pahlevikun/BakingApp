@@ -10,9 +10,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 import com.udacity.bakingapp.R;
 import com.udacity.bakingapp.RecipeDetailFragActivity;
 import com.udacity.bakingapp.RecipeDetailActActivity;
@@ -48,6 +50,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     @Override
     public void onBindViewHolder(RecyclerAdapter.ViewHolder viewHolder, final int i) {
 
+        if (!movieData.get(i).getImage().isEmpty()){
+            Picasso.with(context).load(movieData.get(i).getImage()).into(viewHolder.imageView);
+        }else{
+            Picasso.with(context).load(R.drawable.ic_no_video).into(viewHolder.imageView);
+        }
         viewHolder.textView1.setText(movieData.get(i).getName());
         viewHolder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,12 +107,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         private TextView textView1;
+        private ImageView imageView;
         private CardView cardView;
 
         public ViewHolder(View view) {
             super(view);
             textView1 = (TextView) view.findViewById(R.id.textViewTitle);
             cardView = (CardView) view.findViewById(R.id.cardViewMovie);
+            imageView = (ImageView) view.findViewById(R.id.imageView);
 
         }
     }
