@@ -72,7 +72,9 @@ public class RecipeDetailVideoFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        positionExo = player.getCurrentPosition();
+        if (player!=null){
+            positionExo = player.getCurrentPosition();
+        }
         Log.d("HASILFRAG", "13 Simpan ke bundle");
         outState.putInt(KEY_POSITION, posisiSekarang);
         outState.putLong(SELECTED_POSITION, positionExo);
